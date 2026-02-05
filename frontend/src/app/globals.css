@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cdl-blue: #1E3A8A;
+  --cdl-blue-dark: #172554;
+  --cdl-blue-light: #3B82F6;
+  --cdl-gray: #F8FAFC;
+  --cdl-gray-text: #64748B;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply antialiased text-gray-900 bg-white;
+}
+
+@layer components {
+  .container-cdl {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-cdl-blue px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-cdl-blue-dark focus:outline-none focus:ring-2 focus:ring-cdl-blue focus:ring-offset-2 transition-colors;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border-2 border-cdl-blue px-6 py-3 text-sm font-semibold text-cdl-blue hover:bg-cdl-blue hover:text-white transition-colors;
+  }
+  .link-underline {
+    @apply text-cdl-blue hover:text-cdl-blue-dark underline underline-offset-4 decoration-2;
+  }
+}
+
+/* Conteúdo HTML (páginas, notícias) */
+.prose-cdl p { @apply mt-3 text-gray-700 leading-relaxed; }
+.prose-cdl p:first-child { @apply mt-0; }
+.prose-cdl ul { @apply mt-3 list-disc pl-6 space-y-1 text-gray-700; }
+.prose-cdl ol { @apply mt-3 list-decimal pl-6 space-y-1 text-gray-700; }
+.prose-cdl h2 { @apply mt-8 text-xl font-semibold text-gray-900; }
+.prose-cdl h3 { @apply mt-6 text-lg font-semibold text-gray-900; }
+.prose-cdl a { @apply text-cdl-blue hover:underline; }
+.prose-cdl strong { @apply font-semibold text-gray-900; }
+.prose-cdl blockquote { @apply border-l-4 border-cdl-blue pl-4 my-4 text-gray-600 italic; }

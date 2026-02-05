@@ -1,0 +1,87 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+
+const adminNav = [
+  { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/paginas', label: 'Páginas' },
+  { href: '/admin/diretoria', label: 'Diretoria' },
+  { href: '/admin/servicos', label: 'Serviços' },
+  { href: '/admin/noticias', label: 'Notícias' },
+  { href: '/admin/contato', label: 'Mensagens' },
+  { href: '/admin/configuracoes', label: 'Configurações' },
+];
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const isLogin = pathname === '/admin' && !pathname.startsWith('/admin/');
+  const isLoginPage = pathname === '/admin/login';
+
+  if (isLoginPage) return <>{children}</>;
+
+  const token = typeof window !== 'undefined' ? localStorage.getItem('cdl_admin_token') : null;
+  if (!token && pathname.startsWith('/admin')) {
+    router.replace('/admin/login');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-cdl-gray">
+        <p className="text-cdl-gray-text">Redirecionando...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-cdl-gray flex">
+      <aside className="w-56 bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0 bottom-0 z-40">
+        <div className="p-4 border-b border-gray-200">
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/logo.png" alt="CDL" width={80} height={28} className="h-7 w-auto" />
+            <span className="text-sm font-semibold text-cdl-blue">Admin</span>
+          </Link>
+        </div>
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+          {adminNav.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                pathname === item.href ? 'bg-cdl-blue text-white' : 'text-gray-700 hover:bg-cdl-gray'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="p-3 border-t border-gray-200">
+          <Link href="/" className="block px-3 py-2 text-sm text-cdl-gray-text hover:text-cdl-blue">
+            Ver site
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem('cdl_admin_token');
+              router.push('/admin/login');
+            }}
+            className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+          >
+            Sair
+          </button>
+        </div>
+      </aside>
+      <div className="flex-1 pl-56">
+        <div className="p-6 lg:p-8">{children}</div>
+      </div>
+    </div>
+  );
+}
