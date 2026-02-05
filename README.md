@@ -57,6 +57,16 @@ Altere a senha em produção.
 - **Menu público:** Home, Institucional (Diretoria, Nossa Cidade), Serviços, Notícias, Atendimento, Área do Associado, Associe-se
 - **Admin:** `/admin` — login em `/admin/login`. Gerenciamento de páginas, diretoria, serviços, notícias, mensagens de contato e configurações do site (hero, telefone, email, endereço).
 
+## Deploy no Netlify
+
+O frontend está configurado para deploy no Netlify via `netlify.toml`:
+
+1. Conecte o repositório ao Netlify
+2. O build usa automaticamente `base = "frontend"` (monorepo)
+3. Configure a variável de ambiente **NEXT_PUBLIC_API_URL** com a URL da API em produção (ex: `https://sua-api.railway.app` ou Render)
+
+O backend deve ser hospedado separadamente (Railway, Render, Fly.io, etc.) com PostgreSQL.
+
 ## Scripts
 
 | Pasta     | Comando       | Descrição              |
