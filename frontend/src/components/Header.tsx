@@ -17,7 +17,6 @@ const menuItems = [
   { href: '/noticias', label: 'Notícias' },
   { href: '/atendimento', label: 'Atendimento' },
   { href: '/area-associado', label: 'Área do Associado' },
-  { href: '/associe-se', label: 'Associe-se' },
 ];
 
 export function Header() {
@@ -94,13 +93,6 @@ export function Header() {
               className="btn-primary text-sm py-2.5 px-4 hidden sm:inline-flex"
             >
               Associe-se
-            </Link>
-            <Link
-              href="/admin"
-              className="text-sm text-cdl-gray-text hover:text-cdl-blue px-2 py-1 rounded"
-              aria-label="Área administrativa"
-            >
-              Admin
             </Link>
             <button
               type="button"
