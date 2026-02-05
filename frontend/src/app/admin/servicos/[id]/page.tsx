@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiGet, apiPut, apiPost, type Service } from '@/lib/api';
+import { slugifyUnique } from '@/lib/slug';
 
 export default function AdminServicoEditPage() {
   const params = useParams();
@@ -11,8 +12,10 @@ export default function AdminServicoEditPage() {
   const id = params.id as string;
   const isNew = id === 'novo';
   const [svc, setSvc] = useState<Partial<Service>>({ title: '', slug: '', description: '', published: true, order: 0 });
+  const [existingSlugs, setExistingSlugs] = useState<string[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const slugManuallyEdited = useRef(false);
 
   useEffect(() => {
     if (isNew) return;
@@ -22,6 +25,13 @@ export default function AdminServicoEditPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id, isNew]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('cdl_admin_token');
+    apiGet<Service[]>('/services', token)
+      .then((list) => setExistingSlugs(list.map((s) => s.slug).filter(Boolean)))
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,17 +63,26 @@ export default function AdminServicoEditPage() {
             type="text"
             required
             value={svc.title ?? ''}
-            onChange={(e) => setSvc((s) => ({ ...s, title: e.target.value }))}
+            onChange={(e) => {
+              const title = e.target.value;
+              setSvc((s) => {
+                const newSlug = slugManuallyEdited.current ? (s.slug ?? '') : slugifyUnique(title, existingSlugs, s.slug);
+                return { ...s, title, slug: newSlug };
+              });
+            }}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Slug (URL)</label>
+          <label className="block text-sm font-medium text-gray-700">Slug (URL) — preenchido automaticamente</label>
           <input
             type="text"
             required
             value={svc.slug ?? ''}
-            onChange={(e) => setSvc((s) => ({ ...s, slug: e.target.value }))}
+            onChange={(e) => {
+              slugManuallyEdited.current = true;
+              setSvc((s) => ({ ...s, slug: e.target.value }));
+            }}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
             placeholder="ex: spc-serasa"
           />

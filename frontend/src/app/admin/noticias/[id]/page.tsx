@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiGet, apiPut, apiPost, type NewsItem } from '@/lib/api';
+import { slugifyUnique } from '@/lib/slug';
 
 export default function AdminNoticiaEditPage() {
   const params = useParams();
@@ -19,8 +20,10 @@ export default function AdminNoticiaEditPage() {
     published: true,
     publishedAt: new Date().toISOString().slice(0, 10),
   });
+  const [existingSlugs, setExistingSlugs] = useState<string[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const slugManuallyEdited = useRef(false);
 
   useEffect(() => {
     if (isNew) return;
@@ -30,6 +33,13 @@ export default function AdminNoticiaEditPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id, isNew]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('cdl_admin_token');
+    apiGet<{ items: NewsItem[] }>('/news?limit=200', token)
+      .then((data) => setExistingSlugs(data.items.map((n) => n.slug).filter(Boolean)))
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,18 +75,28 @@ export default function AdminNoticiaEditPage() {
             type="text"
             required
             value={news.title ?? ''}
-            onChange={(e) => setNews((n) => ({ ...n, title: e.target.value }))}
+            onChange={(e) => {
+              const title = e.target.value;
+              setNews((n) => {
+                const newSlug = slugManuallyEdited.current ? (n.slug ?? '') : slugifyUnique(title, existingSlugs, n.slug);
+                return { ...n, title, slug: newSlug };
+              });
+            }}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Slug (URL)</label>
+          <label className="block text-sm font-medium text-gray-700">Slug (URL) — preenchido automaticamente</label>
           <input
             type="text"
             required
             value={news.slug ?? ''}
-            onChange={(e) => setNews((n) => ({ ...n, slug: e.target.value }))}
+            onChange={(e) => {
+              slugManuallyEdited.current = true;
+              setNews((n) => ({ ...n, slug: e.target.value }));
+            }}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+            placeholder="ex: novidade-2025"
           />
         </div>
         <div>

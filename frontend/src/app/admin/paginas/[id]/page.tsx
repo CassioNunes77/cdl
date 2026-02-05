@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiGet, apiPut, apiPost, type Page } from '@/lib/api';
+import { slugify, slugifyUnique } from '@/lib/slug';
 
 export default function AdminPaginaEditPage() {
   const params = useParams();
@@ -11,14 +12,20 @@ export default function AdminPaginaEditPage() {
   const id = params.id as string;
   const isNew = id === 'nova';
   const [page, setPage] = useState<Partial<Page>>({ title: '', slug: '', content: '', excerpt: '', published: true });
+  const [existingSlugs, setExistingSlugs] = useState<string[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const slugManuallyEdited = useRef(false);
 
   useEffect(() => {
     if (isNew) return;
     const token = localStorage.getItem('cdl_admin_token');
     apiGet<Page>(`/pages/by-id/${id}`, token).then((p) => setPage(p)).catch(() => {}).finally(() => setLoading(false));
   }, [id, isNew]);
+
+  useEffect(() => {
+    apiGet<Page[]>('/pages').then((list) => setExistingSlugs(list.map((p) => p.slug).filter(Boolean))).catch(() => {});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,17 +57,26 @@ export default function AdminPaginaEditPage() {
             type="text"
             required
             value={page.title ?? ''}
-            onChange={(e) => setPage((p) => ({ ...p, title: e.target.value }))}
+            onChange={(e) => {
+              const title = e.target.value;
+              setPage((p) => {
+                const newSlug = slugManuallyEdited.current ? (p.slug ?? '') : slugifyUnique(title, existingSlugs, p.slug);
+                return { ...p, title, slug: newSlug };
+              });
+            }}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Slug (URL)</label>
+          <label className="block text-sm font-medium text-gray-700">Slug (URL) — preenchido automaticamente</label>
           <input
             type="text"
             required
             value={page.slug ?? ''}
-            onChange={(e) => setPage((p) => ({ ...p, slug: e.target.value }))}
+            onChange={(e) => {
+              slugManuallyEdited.current = true;
+              setPage((p) => ({ ...p, slug: e.target.value }));
+            }}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
             placeholder="ex: nossa-cidade"
           />
