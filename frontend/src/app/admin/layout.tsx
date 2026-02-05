@@ -44,10 +44,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-cdl-gray flex">
       <aside className="w-56 bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0 bottom-0 z-40">
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 flex justify-start">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="CDL" width={80} height={28} className="h-7 w-auto" />
-            <span className="text-sm font-semibold text-cdl-blue">Admin</span>
+            <Image src="/logo.png" alt="CDL Paulo Afonso" width={80} height={28} className="h-7 w-auto" />
+            <span className="text-sm font-semibold text-cdl-blue">Paulo Afonso</span>
           </Link>
         </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
