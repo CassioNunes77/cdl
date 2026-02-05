@@ -66,10 +66,15 @@ O site está pronto para abrir via Netlify. **Não é obrigatório configurar ba
 1. Acesse [netlify.com](https://www.netlify.com) e faça login
 2. **Add new site** → **Import an existing project** → conecte o GitHub
 3. Selecione o repositório `cdl` (ou o nome do seu repo)
-4. O Netlify detecta o `netlify.toml`: base `frontend`, Node 18
+4. **Importante:** em Build settings, confira:
+   - **Base directory:** `frontend`
+   - **Build command:** `npm run build`
+   - **Publish directory:** deixe em branco (o plugin Next.js cuida disso)
 5. Clique em **Deploy site**
 
 O site será publicado em `https://nome-do-projeto.netlify.app`.
+
+**Se continuar dando 404:** em **Site configuration** → **Build & deploy** → **Build settings**, verifique se **Publish directory** está vazio. Se estiver preenchido (ex: `.next` ou `out`), apague para deixar em branco.
 
 ### Variáveis de ambiente
 
