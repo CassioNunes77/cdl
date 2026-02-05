@@ -54,6 +54,7 @@ async function main() {
     { key: 'phone', value: '(75) 3281-0000' },
     { key: 'email', value: 'contato@cdlpauloafonso.com.br' },
     { key: 'address', value: 'Paulo Afonso - BA' },
+    { key: 'whatsapp_number', value: '' },
   ];
 
   for (const s of defaultSettings) {

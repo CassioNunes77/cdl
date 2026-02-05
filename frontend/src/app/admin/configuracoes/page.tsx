@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react';
 import { apiGet, apiPut, type SiteSettings } from '@/lib/api';
 
+const WHATSAPP_STORAGE_KEY = 'cdl_whatsapp_number';
+
 const SETTING_KEYS = [
   { key: 'hero_title', label: 'Título do hero (Home)', placeholder: 'A CDL que faz sua empresa...' },
   { key: 'hero_subtitle', label: 'Subtítulo do hero', placeholder: 'Comunidade empresarial...' },
-  { key: 'phone', label: 'Telefone' },
-  { key: 'email', label: 'Email' },
-  { key: 'address', label: 'Endereço' },
+  { key: 'phone', label: 'Telefone', placeholder: '' },
+  { key: 'email', label: 'Email', placeholder: '' },
+  { key: 'address', label: 'Endereço', placeholder: '' },
+  { key: 'whatsapp_number', label: 'WhatsApp (número com DDD, ex: 75999999999)', placeholder: '75999999999' },
 ];
 
 export default function AdminConfiguracoesPage() {
@@ -20,8 +23,18 @@ export default function AdminConfiguracoesPage() {
     const token = localStorage.getItem('cdl_admin_token');
     if (!token) return;
     apiGet<SiteSettings>('/settings', token)
-      .then(setSettings)
-      .catch(() => setSettings({}))
+      .then((data) => {
+        const stored = localStorage.getItem(WHATSAPP_STORAGE_KEY);
+        if (stored && !data.whatsapp_number) {
+          setSettings({ ...data, whatsapp_number: stored });
+        } else {
+          setSettings(data);
+        }
+      })
+      .catch(() => {
+        const stored = localStorage.getItem(WHATSAPP_STORAGE_KEY);
+        setSettings(stored ? { whatsapp_number: stored } : {});
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,9 +42,17 @@ export default function AdminConfiguracoesPage() {
     e.preventDefault();
     setSaving(true);
     const token = localStorage.getItem('cdl_admin_token');
+    const whatsapp = settings.whatsapp_number?.trim();
+    if (whatsapp) {
+      localStorage.setItem(WHATSAPP_STORAGE_KEY, whatsapp);
+    } else {
+      localStorage.removeItem(WHATSAPP_STORAGE_KEY);
+    }
     try {
       const updated = await apiPut<SiteSettings>('/settings', settings, token);
       setSettings(updated);
+    } catch {
+      setSettings((s) => ({ ...s, whatsapp_number: whatsapp || '' }));
     } finally {
       setSaving(false);
     }
