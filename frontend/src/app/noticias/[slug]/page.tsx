@@ -4,6 +4,10 @@ import Image from 'next/image';
 
 const getApiBase = () => process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
+export async function generateStaticParams() {
+  return [{ slug: '_' }];
+}
+
 async function getNews(slug: string) {
   const base = getApiBase();
   if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) return null;

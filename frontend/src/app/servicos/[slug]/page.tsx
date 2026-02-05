@@ -1,6 +1,10 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
+export async function generateStaticParams() {
+  return [{ slug: '_' }];
+}
+
 async function getService(slug: string) {
   const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
   if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) return null;

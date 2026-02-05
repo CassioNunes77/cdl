@@ -69,12 +69,12 @@ O site está pronto para abrir via Netlify. **Não é obrigatório configurar ba
 4. **Importante:** em Build settings, confira:
    - **Base directory:** `frontend`
    - **Build command:** `npm run build`
-   - **Publish directory:** deixe em branco (o plugin Next.js cuida disso)
+   - **Publish directory:** `out`
 5. Clique em **Deploy site**
 
 O site será publicado em `https://nome-do-projeto.netlify.app`.
 
-**Se continuar dando 404:** em **Site configuration** → **Build & deploy** → **Build settings**, verifique se **Publish directory** está vazio. Se estiver preenchido (ex: `.next` ou `out`), apague para deixar em branco.
+O frontend usa **static export** (`output: 'export'`) — gera HTML estático em `out/`, sem depender do plugin Next.js.
 
 ### Variáveis de ambiente
 
