@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { apiPost } from '@/lib/api';
+
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'admin123';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -12,21 +14,19 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    try {
-      const res = await apiPost<{ token: string }>('/auth/login', { email, password }, null);
-      if (res.token) {
-        localStorage.setItem('cdl_admin_token', res.token);
-        router.push('/admin');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Falha no login');
-    } finally {
-      setLoading(false);
+    const user = (email || '').trim().toLowerCase();
+    const pass = password || '';
+    if ((user === ADMIN_USER || user === 'admin@cdlpauloafonso.com.br') && pass === ADMIN_PASS) {
+      localStorage.setItem('cdl_admin_token', 'mock-admin-token');
+      router.push('/admin');
+    } else {
+      setError('Usuário ou senha incorretos');
     }
+    setLoading(false);
   }
 
   return (

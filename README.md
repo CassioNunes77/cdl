@@ -43,14 +43,14 @@ npm run dev
 
 O site roda em `http://localhost:3000`.
 
-### 3. Acesso admin
+### 3. Acesso admin (sem banco)
 
-Após o seed, use:
+O admin funciona **sem backend** com credenciais locais:
 
-- **Email:** admin@cdlpauloafonso.com.br  
-- **Senha:** admin123  
+- **Usuário:** `admin` ou `admin@cdlpauloafonso.com.br`
+- **Senha:** `admin123`
 
-Altere a senha em produção.
+Acesse `/admin/login`. O frontend está pronto; ao conectar o banco e a API, os dados serão carregados.
 
 ## Estrutura
 
