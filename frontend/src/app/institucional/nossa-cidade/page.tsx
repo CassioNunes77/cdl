@@ -1,9 +1,8 @@
 async function getPage() {
+  const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) return null;
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/pages/nossa-cidade`,
-      { next: { revalidate: 60 } }
-    );
+    const res = await fetch(`${base.replace(/\/$/, '')}/api/pages/nossa-cidade`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     return res.json();
   } catch {

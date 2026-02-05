@@ -59,13 +59,28 @@ Altere a senha em produção.
 
 ## Deploy no Netlify
 
-O frontend está configurado para deploy no Netlify via `netlify.toml`:
+O site está pronto para abrir via Netlify. **Não é obrigatório configurar banco ou API agora** — o site funciona com conteúdo estático e mensagens amigáveis até a API estar disponível.
 
-1. Conecte o repositório ao Netlify
-2. O build usa automaticamente `base = "frontend"` (monorepo)
-3. Configure a variável de ambiente **NEXT_PUBLIC_API_URL** com a URL da API em produção (ex: `https://sua-api.railway.app` ou Render)
+### Passo a passo
 
-O backend deve ser hospedado separadamente (Railway, Render, Fly.io, etc.) com PostgreSQL.
+1. Acesse [netlify.com](https://www.netlify.com) e faça login
+2. **Add new site** → **Import an existing project** → conecte o GitHub
+3. Selecione o repositório `cdl` (ou o nome do seu repo)
+4. O Netlify detecta o `netlify.toml`: base `frontend`, Node 18
+5. Clique em **Deploy site**
+
+O site será publicado em `https://nome-do-projeto.netlify.app`.
+
+### Variáveis de ambiente
+
+- **NEXT_PUBLIC_API_URL** (opcional): URL da API em produção (ex: `https://sua-api.railway.app`). Enquanto não configurar, o site usa conteúdo padrão e exibe mensagens como "em breve" onde há dados dinâmicos.
+
+### Depois: backend e banco
+
+Quando quiser ativar o backend:
+1. Crie um banco PostgreSQL (Neon, Supabase, Railway, etc.)
+2. Faça deploy do backend em Railway ou Render
+3. Configure **NEXT_PUBLIC_API_URL** no Netlify com a URL da API
 
 ## Scripts
 

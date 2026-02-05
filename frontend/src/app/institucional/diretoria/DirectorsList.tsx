@@ -1,10 +1,12 @@
 import Image from 'next/image';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const getApiBase = () => process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 async function getDirectors() {
+  const base = getApiBase();
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) return [];
   try {
-    const res = await fetch(`${API_URL}/api/directors`, { next: { revalidate: 60 } });
+    const res = await fetch(`${base.replace(/\/$/, '')}/api/directors`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     return res.json();
   } catch {
@@ -31,7 +33,7 @@ export async function DirectorsList() {
             {d.photo ? (
               <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden bg-cdl-gray">
                 <Image
-                  src={d.photo.startsWith('http') ? d.photo : `${API_URL}${d.photo}`}
+                  src={d.photo.startsWith('http') ? d.photo : `${getApiBase()}${d.photo}`}
                   alt={d.name}
                   fill
                   className="object-cover"

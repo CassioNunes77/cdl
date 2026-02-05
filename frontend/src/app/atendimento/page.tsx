@@ -18,7 +18,9 @@ export default function AtendimentoPage() {
       setSent(true);
       setForm({ name: '', email: '', phone: '', subject: '', message: '' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao enviar. Tente novamente.');
+      const msg = err instanceof Error ? err.message : 'Erro ao enviar.';
+      const isNetwork = /fetch|network|Failed/i.test(msg);
+      setError(isNetwork ? 'Serviço em configuração. Tente novamente mais tarde ou entre em contato por email.' : msg);
     } finally {
       setLoading(false);
     }

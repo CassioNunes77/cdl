@@ -1,13 +1,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const getApiBase = () => process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 async function getNews() {
+  const base = getApiBase();
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) return { items: [] };
   try {
-    const res = await fetch(`${API_URL}/api/news?limit=20`, { next: { revalidate: 60 } });
+    const res = await fetch(`${base.replace(/\/$/, '')}/api/news?limit=20`, { next: { revalidate: 60 } });
     if (!res.ok) return { items: [] };
-    return res.json();
+    const data = await res.json();
+    return data;
   } catch {
     return { items: [] };
   }
@@ -33,7 +36,7 @@ export default async function NoticiasPage() {
                 {n.image ? (
                   <div className="relative aspect-video bg-cdl-gray">
                     <Image
-                      src={n.image.startsWith('http') ? n.image : `${API_URL}${n.image}`}
+                      src={n.image.startsWith('http') ? n.image : `${getApiBase()}${n.image}`}
                       alt=""
                       fill
                       className="object-cover group-hover:scale-[1.02] transition-transform"

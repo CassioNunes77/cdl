@@ -1,11 +1,10 @@
 import Link from 'next/link';
 
 async function getServices(): Promise<{ id: string; title: string; slug: string; description: string }[]> {
+  const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) return [];
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'}/api/services`,
-      { next: { revalidate: 60 } }
-    );
+    const res = await fetch(`${base.replace(/\/$/, '')}/api/services`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const list = await res.json();
     return list.slice(0, 6);

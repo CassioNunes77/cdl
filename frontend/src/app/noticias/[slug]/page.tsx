@@ -2,14 +2,13 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const getApiBase = () => process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 async function getNews(slug: string) {
+  const base = getApiBase();
+  if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_API_URL) return null;
   try {
-    const res = await fetch(
-      `${API_URL}/api/news/${slug}`,
-      { next: { revalidate: 60 } }
-    );
+    const res = await fetch(`${base.replace(/\/$/, '')}/api/news/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     return res.json();
   } catch {
@@ -30,7 +29,7 @@ export default async function NewsPage({ params }: { params: Promise<{ slug: str
         {news.image && (
           <div className="relative aspect-video rounded-xl overflow-hidden bg-cdl-gray mb-8">
             <Image
-              src={news.image.startsWith('http') ? news.image : `${API_URL}${news.image}`}
+              src={news.image.startsWith('http') ? news.image : `${getApiBase()}${news.image}`}
               alt=""
               fill
               className="object-cover"
