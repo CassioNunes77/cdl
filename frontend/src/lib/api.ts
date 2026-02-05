@@ -6,10 +6,21 @@ function getToken(): string | null {
   return localStorage.getItem('cdl_admin_token');
 }
 
+/** Em produção sem API configurada, não tenta fetch (evita NetworkError) */
+function isApiAvailable(): boolean {
+  if (typeof window === 'undefined') return !!process.env.NEXT_PUBLIC_API_URL;
+  if (process.env.NEXT_PUBLIC_API_URL) return true;
+  const host = window.location.hostname;
+  return host === 'localhost' || host === '127.0.0.1';
+}
+
 export async function api<T>(
   path: string,
   options: RequestInit & { token?: string | null } = {}
 ): Promise<T> {
+  if (!isApiAvailable()) {
+    return Promise.reject(new Error('API não configurada'));
+  }
   const { token = getToken(), ...init } = options;
   const headers = new Headers(init.headers);
   headers.set('Content-Type', 'application/json');
