@@ -11,6 +11,7 @@ import news from './routes/news.js';
 import contact from './routes/contact.js';
 import settings from './routes/settings.js';
 import upload from './routes/upload.js';
+import about from './routes/about.js';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
@@ -28,6 +29,7 @@ app.use('/api/news', news);
 app.use('/api/contact', contact);
 app.use('/api/settings', settings);
 app.use('/api/upload', upload);
+app.use('/api/about', about);
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

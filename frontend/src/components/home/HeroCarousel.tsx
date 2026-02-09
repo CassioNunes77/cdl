@@ -48,20 +48,20 @@ export function HeroCarousel({ slides, autoSlideInterval = 5000 }: HeroCarouselP
   if (slides.length === 0) return null;
 
   return (
-    <section className="relative bg-gradient-to-br from-cdl-blue via-cdl-blue-dark to-cdl-blue overflow-hidden">
+    <section className="relative bg-gradient-to-br from-cdl-blue via-cdl-blue-dark to-cdl-blue overflow-hidden min-h-[500px] sm:min-h-[600px] lg:min-h-[650px]">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.08)_0%,_transparent_50%)]" aria-hidden="true" />
       
       {/* Slides */}
-      <div className="relative">
+      <div className="relative min-h-[500px] sm:min-h-[600px] lg:min-h-[650px]">
         {slides.map((slide, index) => (
           <div
             key={index}
-            className={`transition-opacity duration-700 ease-in-out ${
-              index === currentIndex ? 'opacity-100' : 'opacity-0 absolute inset-0'
+            className={`transition-opacity duration-700 ease-in-out absolute inset-0 flex items-center ${
+              index === currentIndex ? 'opacity-100 relative' : 'opacity-0'
             }`}
             aria-hidden={index !== currentIndex}
           >
-            <div className="container-cdl relative py-16 sm:py-24 lg:py-32">
+            <div className="container-cdl relative w-full py-16 sm:py-24 lg:py-32">
               <div className="max-w-3xl">
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
                   {slide.title}

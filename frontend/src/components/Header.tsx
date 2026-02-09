@@ -9,6 +9,7 @@ const menuItems = [
   {
     label: 'Institucional',
     children: [
+      { href: '/institucional/cdl-paulo-afonso', label: 'CDL Paulo Afonso' },
       { href: '/institucional/diretoria', label: 'Diretoria' },
       { href: '/institucional/nossa-cidade', label: 'Nossa Cidade' },
     ],

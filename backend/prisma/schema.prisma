@@ -79,3 +79,12 @@ model SiteSetting {
   key   String @unique
   value String @db.Text
 }
+
+model About {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  photo       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

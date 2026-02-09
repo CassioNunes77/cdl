@@ -50,3 +50,4 @@ export type Director = { id: string; name: string; role: string; photo: string |
 export type Service = { id: string; title: string; slug: string; description: string; icon: string | null; order: number; published: boolean };
 export type NewsItem = { id: string; title: string; slug: string; excerpt: string; content: string; image: string | null; published: boolean; publishedAt: string | null; createdAt: string };
 export type SiteSettings = Record<string, string>;
+export type About = { id?: string; title: string; description: string; photo: string | null };
