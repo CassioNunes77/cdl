@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import Image from 'next/image';
 
 type About = {
@@ -30,10 +29,6 @@ export default async function CDLPauloAfonsoPage() {
 
   return (
     <div className="container-cdl py-8 sm:py-12">
-      <Link href="/institucional" className="text-sm text-cdl-blue hover:underline mb-6 inline-block">
-        ← Institucional
-      </Link>
-
       <div className="max-w-4xl">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
           {about.title || 'CDL Paulo Afonso'}
