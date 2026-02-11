@@ -38,8 +38,18 @@ export function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-blue-200/90">Contato</h3>
             <p className="mt-3 text-sm text-white/90">Paulo Afonso - BA</p>
             <p className="text-sm text-white/90">
-              <a href="mailto:contato@cdlpauloafonso.com.br" className="hover:text-white transition-colors">
-                contato@cdlpauloafonso.com.br
+              <a href="mailto:cdlpauloafonso@hotmail.com" className="hover:text-white transition-colors">
+                cdlpauloafonso@hotmail.com
+              </a>
+            </p>
+            <p className="mt-2 text-sm text-white/90">
+              <a href="tel:+557532814942" className="hover:text-white transition-colors">
+                (75) 3281-4942
+              </a>
+            </p>
+            <p className="text-sm text-white/90">
+              <a href="tel:+557532816997" className="hover:text-white transition-colors">
+                (75) 3281-6997
               </a>
             </p>
           </div>
