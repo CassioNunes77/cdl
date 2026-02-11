@@ -14,7 +14,14 @@ const menuItems = [
       { href: '/institucional/nossa-cidade', label: 'Nossa Cidade' },
     ],
   },
-  { href: '/servicos', label: 'Serviços' },
+  {
+    label: 'Soluções para empresas',
+    children: [
+      { href: '/servicos', label: 'Todos os serviços' },
+      { href: '/servicos/auditorio', label: 'Auditório' },
+      { href: '/servicos/certificado-digital', label: 'Certificado Digital' },
+    ],
+  },
   { href: '/noticias', label: 'Notícias' },
   { href: '/atendimento', label: 'Atendimento' },
   { href: '/area-associado', label: 'Área do Associado' },

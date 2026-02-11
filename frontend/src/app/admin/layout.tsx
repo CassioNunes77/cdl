@@ -10,7 +10,7 @@ const adminNav = [
   { href: '/admin/paginas', label: 'Páginas' },
   { href: '/admin/cdl-paulo-afonso', label: 'CDL Paulo Afonso' },
   { href: '/admin/diretoria', label: 'Diretoria' },
-  { href: '/admin/servicos', label: 'Serviços' },
+  { href: '/admin/servicos', label: 'Soluções para empresas' },
   { href: '/admin/noticias', label: 'Notícias' },
   { href: '/admin/contato', label: 'Mensagens' },
   { href: '/admin/configuracoes', label: 'Configurações' },
