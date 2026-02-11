@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { sendContactEmail } from '../lib/email.js';
 
 const router = Router();
 
@@ -19,6 +20,12 @@ router.post('/', async (req, res) => {
       message,
     },
   });
+  
+  // Enviar email em background (não bloqueia a resposta)
+  sendContactEmail({ name, email, phone, subject, message }).catch((err) => {
+    console.error('Erro ao enviar email de contato:', err);
+  });
+  
   res.status(201).json({ id: contact.id, message: 'Mensagem enviada com sucesso' });
 });
 
