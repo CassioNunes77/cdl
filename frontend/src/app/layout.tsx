@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'CDL Paulo Afonso | Comunidade empresarial',
+  title: 'CDL Paulo Afonso | Câmara de Dirigentes Lojistas de Paulo Afonso',
   description:
     'A CDL que faz sua empresa vender mais, gastar menos e crescer mais rápido. Serviços, networking e apoio ao comércio local.',
 };
