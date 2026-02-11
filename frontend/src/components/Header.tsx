@@ -98,7 +98,7 @@ export function Header() {
           <div className="flex items-center gap-2">
             <Link
               href="/associe-se"
-              className="btn-primary text-sm py-2.5 px-4 hidden sm:inline-flex"
+              className="btn-primary text-sm py-2.5 px-4 hidden sm:inline-flex whitespace-nowrap"
             >
               Associe-se
             </Link>
