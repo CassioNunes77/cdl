@@ -47,20 +47,42 @@ export async function ServicesPreview() {
             ))
           ) : (
             <>
-              {['SPC e Serasa', 'Certificado Digital', 'Saúde empresarial', 'Coworking', 'Defesa do comércio', 'Networking'].map((title, i) => (
-                <div
-                  key={i}
-                  className="p-6 rounded-xl border border-gray-200 bg-white"
-                >
-                  <h3 className="font-semibold text-gray-900">{title}</h3>
-                  <p className="mt-2 text-sm text-cdl-gray-text">
-                    Serviços empresariais para associados CDL.
-                  </p>
-                  <span className="mt-3 inline-flex items-center text-sm font-medium text-cdl-blue">
-                    Em breve
-                  </span>
-                </div>
-              ))}
+              {['SPC e Serasa', 'Certificado Digital', 'Saúde empresarial', 'Coworking', 'Defesa do comércio', 'Networking'].map((title, i) => {
+                if (title === 'Certificado Digital') {
+                  return (
+                    <Link
+                      key={i}
+                      href="/servicos/certificado-digital"
+                      className="group block p-6 rounded-xl border border-gray-200 bg-white hover:border-cdl-blue/30 hover:shadow-md transition-all"
+                    >
+                      <h3 className="font-semibold text-gray-900 group-hover:text-cdl-blue">{title}</h3>
+                      <p className="mt-2 text-sm text-cdl-gray-text">
+                        Serviços empresariais para associados CDL.
+                      </p>
+                      <span className="mt-3 inline-flex items-center text-sm font-medium text-cdl-blue group-hover:underline">
+                        Saiba mais
+                        <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </Link>
+                  );
+                }
+                return (
+                  <div
+                    key={i}
+                    className="p-6 rounded-xl border border-gray-200 bg-white"
+                  >
+                    <h3 className="font-semibold text-gray-900">{title}</h3>
+                    <p className="mt-2 text-sm text-cdl-gray-text">
+                      Serviços empresariais para associados CDL.
+                    </p>
+                    <span className="mt-3 inline-flex items-center text-sm font-medium text-cdl-blue">
+                      Em breve
+                    </span>
+                  </div>
+                );
+              })}
             </>
           )}
         </div>

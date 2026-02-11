@@ -1,5 +1,5 @@
 const stats = [
-  { value: '+60', label: 'Anos de atuação' },
+  { value: '26', label: 'Anos de Atuação' },
   { value: '+200', label: 'Empresas associadas' },
   { value: 'Sistema', label: 'CDL Nacional' },
 ];

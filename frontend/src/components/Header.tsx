@@ -24,7 +24,7 @@ const menuItems = [
   },
   { href: '/noticias', label: 'Notícias' },
   { href: '/atendimento', label: 'Atendimento' },
-  { href: '/area-associado', label: 'Área do Associado' },
+  { href: 'https://sistema.spc.org.br/spc/controleacesso/autenticacao/entry.action', label: 'Área do Associado', external: true },
 ];
 
 export function Header() {
@@ -84,13 +84,25 @@ export function Header() {
                   )}
                 </div>
               ) : (
-                <Link
-                  key={item.href!}
-                  href={item.href!}
-                  className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-cdl-blue rounded-lg hover:bg-cdl-gray transition-colors whitespace-nowrap"
-                >
-                  {item.label}
-                </Link>
+                item.external ? (
+                  <a
+                    key={item.href!}
+                    href={item.href!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-cdl-blue rounded-lg hover:bg-cdl-gray transition-colors whitespace-nowrap"
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.href!}
+                    href={item.href!}
+                    className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-cdl-blue rounded-lg hover:bg-cdl-gray transition-colors whitespace-nowrap"
+                  >
+                    {item.label}
+                  </Link>
+                )
               )
             )}
           </nav>
@@ -140,14 +152,27 @@ export function Header() {
                   ))}
                 </div>
               ) : (
-                <Link
-                  key={item.href!}
-                  href={item.href!}
-                  className="px-4 py-3 text-gray-700 hover:bg-cdl-gray rounded-lg font-medium"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {item.label}
-                </Link>
+                item.external ? (
+                  <a
+                    key={item.href!}
+                    href={item.href!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-3 text-gray-700 hover:bg-cdl-gray rounded-lg font-medium"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.href!}
+                    href={item.href!}
+                    className="px-4 py-3 text-gray-700 hover:bg-cdl-gray rounded-lg font-medium"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                )
               )
             )}
             <Link
