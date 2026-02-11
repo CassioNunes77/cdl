@@ -17,6 +17,14 @@ export const metadata: Metadata = {
   title: 'CDL Paulo Afonso | Câmara de Dirigentes Lojistas de Paulo Afonso',
   description:
     'A CDL que faz sua empresa vender mais, gastar menos e crescer mais rápido. Serviços, networking e apoio ao comércio local.',
+  icons: {
+    icon: [
+      { url: '/favicon-180x180.png', sizes: '180x180', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({
