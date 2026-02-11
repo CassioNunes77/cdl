@@ -12,31 +12,37 @@ function formatWhatsAppNumber(value: string): string {
   return digits;
 }
 
-export function WhatsAppContactButton({ message }: { message: string }) {
+export function WhatsAppContactButton({ message, phoneNumber }: { message: string; phoneNumber?: string }) {
   const [url, setUrl] = useState<string>('#');
 
   useEffect(() => {
     const load = async () => {
-      const env = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.trim();
-      const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-
       let number = '';
 
-      try {
-        const settings = await apiGet<Record<string, string>>('/settings');
-        const apiNum = settings?.whatsapp_number?.trim();
-        if (apiNum) {
-          number = formatWhatsAppNumber(apiNum);
-        }
-      } catch {
-        // API não disponível
-      }
+      // Se um número específico foi fornecido, use-o
+      if (phoneNumber) {
+        number = formatWhatsAppNumber(phoneNumber);
+      } else {
+        // Caso contrário, tente buscar das configurações
+        const env = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.trim();
+        const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
 
-      if (!number && stored) {
-        number = formatWhatsAppNumber(stored);
-      }
-      if (!number && env) {
-        number = formatWhatsAppNumber(env);
+        try {
+          const settings = await apiGet<Record<string, string>>('/settings');
+          const apiNum = settings?.whatsapp_number?.trim();
+          if (apiNum) {
+            number = formatWhatsAppNumber(apiNum);
+          }
+        } catch {
+          // API não disponível
+        }
+
+        if (!number && stored) {
+          number = formatWhatsAppNumber(stored);
+        }
+        if (!number && env) {
+          number = formatWhatsAppNumber(env);
+        }
       }
 
       if (number && number.length >= 10) {
@@ -45,7 +51,7 @@ export function WhatsAppContactButton({ message }: { message: string }) {
       }
     };
     load();
-  }, [message]);
+  }, [message, phoneNumber]);
 
   return (
     <a

@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { WhatsAppContactButton } from './WhatsAppContactButton';
 
 export const dynamic = 'force-static';
@@ -7,10 +6,6 @@ export default function CertificadoDigitalPage() {
   return (
     <div className="py-12 sm:py-16">
       <div className="container-cdl max-w-4xl">
-        <Link href="/servicos" className="text-sm text-cdl-blue hover:underline mb-6 inline-block">
-          ← Voltar aos serviços
-        </Link>
-
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
           Certificado Digital
         </h1>
@@ -50,6 +45,23 @@ export default function CertificadoDigitalPage() {
                 <span><strong>Presencialmente:</strong> Agende um horário e faça o atendimento pessoalmente em nossa sede.</span>
               </li>
             </ul>
+          </div>
+
+          <div className="mt-8 p-6 bg-gradient-to-r from-cdl-blue/10 to-cdl-blue-dark/10 rounded-xl border-2 border-cdl-blue/30">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-6 h-6 text-cdl-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Benefício para Associados</h3>
+                <p className="text-cdl-gray-text">
+                  <strong>Associados da CDL têm valor reduzido no Certificado Digital!</strong> Aproveite este benefício exclusivo 
+                  e garanta segurança nas suas transações eletrônicas com condições especiais.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 p-6 bg-white rounded-xl border border-gray-200">
@@ -113,7 +125,10 @@ export default function CertificadoDigitalPage() {
         </div>
 
         <div className="mt-10">
-          <WhatsAppContactButton message="Olá! Gostaria de solicitar uma proposta personalizada para Certificado Digital." />
+          <WhatsAppContactButton 
+            message="Olá! Gostaria de solicitar uma proposta personalizada para Certificado Digital." 
+            phoneNumber="7532816997"
+          />
         </div>
       </div>
     </div>
