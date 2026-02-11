@@ -47,7 +47,7 @@ export function Header() {
             <span className="hidden sm:inline text-lg font-semibold text-cdl-blue">Paulo Afonso</span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1" aria-label="Menu principal">
+          <nav className="hidden lg:flex items-center gap-1 flex-nowrap" aria-label="Menu principal">
             {menuItems.map((item) =>
               item.children ? (
                 <div
@@ -58,7 +58,7 @@ export function Header() {
                 >
                   <button
                     type="button"
-                    className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-cdl-blue rounded-lg hover:bg-cdl-gray transition-colors flex items-center gap-1"
+                    className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-cdl-blue rounded-lg hover:bg-cdl-gray transition-colors flex items-center gap-1 whitespace-nowrap"
                     aria-expanded={openDropdown === item.label}
                     aria-haspopup="true"
                   >
@@ -87,7 +87,7 @@ export function Header() {
                 <Link
                   key={item.href!}
                   href={item.href!}
-                  className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-cdl-blue rounded-lg hover:bg-cdl-gray transition-colors"
+                  className="px-4 py-3 text-sm font-medium text-gray-700 hover:text-cdl-blue rounded-lg hover:bg-cdl-gray transition-colors whitespace-nowrap"
                 >
                   {item.label}
                 </Link>
