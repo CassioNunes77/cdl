@@ -19,6 +19,12 @@ async function getService(slug: string) {
 
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  
+  // Excluir rotas estáticas que têm suas próprias páginas
+  if (slug === 'auditorio' || slug === 'certificado-digital') {
+    notFound();
+  }
+  
   const service = await getService(slug);
   if (!service) notFound();
   return (
