@@ -37,7 +37,7 @@ export async function Hero() {
       subtitle: 'Transações virtuais, segurança real. Suas operações digitais muito mais seguras.',
       primaryButton: {
         text: 'Saiba mais',
-        href: '/servicos',
+        href: '/servicos/certificado-digital',
       },
       secondaryButton: {
         text: 'Associe-se',
