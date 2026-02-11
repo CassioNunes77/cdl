@@ -41,5 +41,7 @@ body {
 .prose-cdl h2 { @apply mt-8 text-xl font-semibold text-gray-900; }
 .prose-cdl h3 { @apply mt-6 text-lg font-semibold text-gray-900; }
 .prose-cdl a { @apply text-cdl-blue hover:underline; }
+.prose-cdl a.btn-primary { @apply text-white hover:text-white hover:no-underline; }
+.prose-cdl a.btn-secondary { @apply hover:text-white; }
 .prose-cdl strong { @apply font-semibold text-gray-900; }
 .prose-cdl blockquote { @apply border-l-4 border-cdl-blue pl-4 my-4 text-gray-600 italic; }

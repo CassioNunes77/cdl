@@ -35,14 +35,16 @@ export default async function AreaAssociadoPage() {
                 <li>• Representação e defesa do comércio</li>
                 <li>• Informações e apoio ao desenvolvimento do seu negócio</li>
               </ul>
-              <p className="mt-8">
-                <Link href="/associe-se" className="btn-primary">
-                  Associe-se
-                </Link>
-              </p>
             </>
           )}
         </div>
+        {!page?.content && (
+          <div className="mt-8">
+            <Link href="/associe-se" className="btn-primary">
+              Associe-se
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
