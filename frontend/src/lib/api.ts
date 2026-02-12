@@ -48,6 +48,7 @@ export const apiDelete = <T>(path: string, token?: string | null) =>
 export type Page = { id: string; slug: string; title: string; content: string; excerpt: string | null; published: boolean };
 export type Director = { id: string; name: string; role: string; photo: string | null; order: number; bio: string | null };
 export type Service = { id: string; title: string; slug: string; description: string; icon: string | null; order: number; published: boolean };
-export type NewsItem = { id: string; title: string; slug: string; excerpt: string; content: string; image: string | null; published: boolean; publishedAt: string | null; createdAt: string };
+export type NewsLink = { label: string; url: string; type: 'download' | 'external' };
+export type NewsItem = { id: string; title: string; slug: string; excerpt: string; content: string; image: string | null; links: NewsLink[] | null; published: boolean; publishedAt: string | null; createdAt: string };
 export type SiteSettings = Record<string, string>;
 export type About = { id?: string; title: string; description: string; photo: string | null };

@@ -57,6 +57,7 @@ model News {
   excerpt   String   @db.Text
   content   String   @db.Text
   image     String?
+  links     Json?    // Array de links: [{ label: string, url: string, type: 'download' | 'external' }]
   published Boolean  @default(true)
   publishedAt DateTime?
   createdAt DateTime @default(now())

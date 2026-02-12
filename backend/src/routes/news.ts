@@ -45,7 +45,7 @@ router.get('/:slug', async (req, res) => {
 });
 
 router.post('/', authMiddleware, async (req, res) => {
-  const { title, slug, excerpt, content, image, published, publishedAt } = req.body;
+  const { title, slug, excerpt, content, image, links, published, publishedAt } = req.body;
   const news = await prisma.news.create({
     data: {
       title,
@@ -53,6 +53,7 @@ router.post('/', authMiddleware, async (req, res) => {
       excerpt,
       content,
       image: image ?? null,
+      links: links ? JSON.parse(JSON.stringify(links)) : null,
       published: published ?? true,
       publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
     },
@@ -61,7 +62,7 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 router.put('/:id', authMiddleware, async (req, res) => {
-  const { title, slug, excerpt, content, image, published, publishedAt } = req.body;
+  const { title, slug, excerpt, content, image, links, published, publishedAt } = req.body;
   const news = await prisma.news.update({
     where: { id: req.params.id },
     data: {
@@ -70,6 +71,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       excerpt,
       content,
       image,
+      links: links !== undefined ? (links ? JSON.parse(JSON.stringify(links)) : null) : undefined,
       published,
       publishedAt: publishedAt ? new Date(publishedAt) : undefined,
     },
