@@ -20,11 +20,12 @@ const menuItems = [
       { href: '/servicos', label: 'Todos os serviços' },
       { href: '/servicos/auditorio', label: 'Auditório' },
       { href: '/servicos/certificado-digital', label: 'Certificado Digital' },
+      { href: '/servicos/beneficios-associados', label: 'Benefícios para associados' },
     ],
   },
   { href: '/noticias', label: 'Notícias' },
   { href: '/atendimento', label: 'Atendimento' },
-  { href: 'https://sistema.spc.org.br/spc/controleacesso/autenticacao/entry.action', label: 'Área do Associado', external: true },
+  { href: '/area-associado', label: 'Área do Associado' },
 ];
 
 export function Header() {
