@@ -222,59 +222,6 @@ export default function IndicadoresEconomicosPage() {
             </table>
           </div>
         </section>
-
-        {/* Infraestrutura */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Infraestrutura e Saneamento</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl border border-gray-200 bg-white">
-              <h3 className="font-semibold text-gray-900 mb-4">Saneamento Básico (2022)</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-cdl-gray-text">Água encanada</span>
-                  <span className="font-medium text-gray-900">98,2%</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-cdl-gray-text">Esgoto sanitário</span>
-                  <span className="font-medium text-gray-900">92,5%</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-cdl-gray-text">Coleta de lixo</span>
-                  <span className="font-medium text-gray-900">99,1%</span>
-                </div>
-              </div>
-              <p className="text-xs text-cdl-gray-text mt-4">Fonte: IBGE</p>
-            </div>
-
-            <div className="p-6 rounded-xl border border-gray-200 bg-white">
-              <h3 className="font-semibold text-gray-900 mb-4">Taxa de Urbanização</h3>
-              <div className="text-center">
-                <p className="text-4xl font-bold text-cdl-blue mb-2">96,8%</p>
-                <p className="text-sm text-cdl-gray-text">(2022)</p>
-              </div>
-              <p className="text-xs text-cdl-gray-text mt-4">Fonte: IBGE</p>
-            </div>
-
-            <div className="p-6 rounded-xl border border-gray-200 bg-white">
-              <h3 className="font-semibold text-gray-900 mb-4">Distâncias até Capitais</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-cdl-gray-text">Salvador</span>
-                  <span className="font-medium text-gray-900">450 km</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cdl-gray-text">Recife</span>
-                  <span className="font-medium text-gray-900">380 km</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cdl-gray-text">Aracaju</span>
-                  <span className="font-medium text-gray-900">280 km</span>
-                </div>
-              </div>
-              <p className="text-xs text-cdl-gray-text mt-4">Fonte: IBGE</p>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );
