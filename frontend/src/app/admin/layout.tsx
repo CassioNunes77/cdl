@@ -7,6 +7,7 @@ import Image from 'next/image';
 
 const adminNav = [
   { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/associados', label: 'Associados' },
   { href: '/admin/paginas', label: 'Páginas' },
   { href: '/admin/cdl-paulo-afonso', label: 'CDL Paulo Afonso' },
   { href: '/admin/diretoria', label: 'Diretoria' },
@@ -46,9 +47,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-cdl-gray flex">
       <aside className="w-56 bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0 bottom-0 z-40">
         <div className="p-4 border-b border-gray-200 flex justify-start">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="CDL Paulo Afonso" width={80} height={28} className="h-7 w-auto" />
-            <span className="text-sm font-semibold text-cdl-blue">Paulo Afonso</span>
+          <Link href="/" className="flex items-center">
+            <Image src="/logo.png" alt="CDL Paulo Afonso" width={100} height={36} className="h-8 w-auto object-contain" />
           </Link>
         </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">

@@ -12,6 +12,7 @@ const menuItems = [
       { href: '/institucional/cdl-paulo-afonso', label: 'CDL Paulo Afonso' },
       { href: '/institucional/diretoria', label: 'Diretoria' },
       { href: '/institucional/nossa-cidade', label: 'Nossa Cidade' },
+      { href: '/institucional/campanhas', label: 'Campanhas' },
     ],
   },
   {
@@ -36,16 +37,15 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200/80">
       <div className="container-cdl">
         <div className="flex h-16 sm:h-18 items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="CDL Paulo Afonso - Home">
+          <Link href="/" className="flex items-center shrink-0" aria-label="CDL Paulo Afonso - Home">
             <Image
               src="/logo.png"
               alt="CDL Paulo Afonso"
               width={120}
               height={44}
-              className="h-10 w-auto object-contain"
+              className="h-12 sm:h-14 w-auto object-contain"
               priority
             />
-            <span className="hidden sm:inline text-lg font-semibold text-cdl-blue">Paulo Afonso</span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1 flex-nowrap" aria-label="Menu principal">
