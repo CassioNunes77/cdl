@@ -46,9 +46,10 @@ export default function CampanhasPage() {
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
           {events.map((event) => (
-            <div
+            <Link
               key={event.id}
-              className="group rounded-xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg hover:border-cdl-blue/30 transition-all"
+              href={`/institucional/campanhas/${event.id}`}
+              className="group rounded-xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg hover:border-cdl-blue/30 transition-all block"
             >
               {/* Image Placeholder */}
               <div className="relative h-48 bg-gradient-to-br from-cdl-blue/20 to-cdl-blue-dark/20 flex items-center justify-center">
@@ -105,7 +106,7 @@ export default function CampanhasPage() {
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
