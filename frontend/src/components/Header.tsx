@@ -41,9 +41,9 @@ export function Header() {
             <Image
               src="/logo.png"
               alt="CDL Paulo Afonso"
-              width={120}
-              height={44}
-              className="h-12 sm:h-14 w-auto object-contain"
+              width={102}
+              height={37}
+              className="h-10 sm:h-12 w-auto object-contain"
               priority
             />
           </Link>

@@ -33,7 +33,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-cdl-gray p-4">
       <div className="w-full max-w-sm rounded-xl bg-white border border-gray-200 shadow-sm p-8">
         <div className="flex justify-center mb-6">
-          <Image src="/logo.png" alt="CDL Paulo Afonso" width={120} height={44} className="h-12 w-auto object-contain" />
+          <Image src="/logo.png" alt="CDL Paulo Afonso" width={102} height={37} className="h-10 w-auto object-contain" />
         </div>
         <h1 className="text-xl font-bold text-center text-gray-900">Área administrativa</h1>
         <p className="mt-1 text-sm text-center text-cdl-gray-text">Faça login para continuar</p>

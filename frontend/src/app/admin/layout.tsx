@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="w-56 bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0 bottom-0 z-40">
         <div className="p-4 border-b border-gray-200 flex justify-start">
           <Link href="/" className="flex items-center">
-            <Image src="/logo.png" alt="CDL Paulo Afonso" width={100} height={36} className="h-8 w-auto object-contain" />
+            <Image src="/logo.png" alt="CDL Paulo Afonso" width={85} height={31} className="h-7 w-auto object-contain" />
           </Link>
         </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
