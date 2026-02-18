@@ -90,7 +90,7 @@ export async function generateStaticParams() {
   return Object.keys(campanhasData).map((slug) => ({ slug }));
 }
 
-export default function CampanhaDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CampanhaDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const campanha = campanhasData[slug];
 
