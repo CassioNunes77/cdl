@@ -13,6 +13,7 @@ const adminNav = [
   { href: '/admin/diretoria', label: 'Diretoria' },
   { href: '/admin/servicos', label: 'Soluções para empresas' },
   { href: '/admin/noticias', label: 'Notícias' },
+  { href: '/admin/campanhas', label: 'Campanhas' },
   { href: '/admin/contato', label: 'Mensagens' },
   { href: '/admin/configuracoes', label: 'Configurações' },
 ];
