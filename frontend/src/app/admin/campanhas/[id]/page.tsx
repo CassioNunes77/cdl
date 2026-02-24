@@ -37,17 +37,41 @@ const campanhasData: Record<string, {
   },
 };
 
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { getCampaign, updateCampaign, Campaign } from '@/lib/firestore';
+
 export default function AdminCampanhaEditPage() {
   const params = useParams();
   const id = params.id as string;
-  const campanha = campanhasData[id];
+  const [campanha, setCampanha] = useState<Campaign | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const c = await getCampaign(id);
+        if (mounted) setCampanha(c);
+      } catch {
+        if (mounted) setError('Erro ao carregar campanha');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
+
+  if (loading) return <p className="text-cdl-gray-text">Carregando...</p>;
   if (!campanha) {
     return (
       <div>
-        <Link href="/admin/campanhas" className="text-sm text-cdl-blue hover:underline mb-4 inline-block">
-          ← Voltar às campanhas
-        </Link>
+        <Link href="/admin/campanhas" className="text-sm text-cdl-blue hover:underline mb-4 inline-block">← Voltar às campanhas</Link>
         <div className="mt-8 p-8 rounded-xl border border-gray-200 bg-white text-center">
           <p className="text-cdl-gray-text">Campanha não encontrada.</p>
         </div>
@@ -55,14 +79,24 @@ export default function AdminCampanhaEditPage() {
     );
   }
 
+  async function handleSave() {
+    setSaving(true);
+    setError('');
+    try {
+      await updateCampaign(id, campanha);
+    } catch {
+      setError('Erro ao salvar campanha');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div>
-      <Link href="/admin/campanhas" className="text-sm text-cdl-blue hover:underline mb-4 inline-block">
-        ← Voltar às campanhas
-      </Link>
+      <Link href="/admin/campanhas" className="text-sm text-cdl-blue hover:underline mb-4 inline-block">← Voltar às campanhas</Link>
 
       <div className="mt-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">{campanha.title}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Editar campanha</h1>
         <p className="text-cdl-gray-text mb-6">Visualização e edição da campanha</p>
 
         <div className="space-y-6">
@@ -71,25 +105,23 @@ export default function AdminCampanhaEditPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
-                <p className="text-gray-900">{campanha.title}</p>
+                <input value={campanha.title} onChange={(e) => setCampanha({ ...campanha, title: e.target.value })} className="mt-1 block w-full rounded-lg border px-3 py-2" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                <span className="inline-block px-3 py-1 text-sm font-semibold rounded-full bg-cdl-blue text-white">
-                  {campanha.category}
-                </span>
+                <input value={campanha.category} onChange={(e) => setCampanha({ ...campanha, category: e.target.value })} className="mt-1 block w-full rounded-lg border px-3 py-2" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Data/Período</label>
-                <p className="text-gray-900">{campanha.date}</p>
+                <input value={campanha.date} onChange={(e) => setCampanha({ ...campanha, date: e.target.value })} className="mt-1 block w-full rounded-lg border px-3 py-2" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                <p className="text-cdl-gray-text">{campanha.description}</p>
+                <textarea value={campanha.description} onChange={(e) => setCampanha({ ...campanha, description: e.target.value })} className="mt-1 block w-full rounded-lg border px-3 py-2" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descrição Completa</label>
-                <p className="text-cdl-gray-text">{campanha.fullDescription}</p>
+                <textarea value={campanha.fullDescription} onChange={(e) => setCampanha({ ...campanha, fullDescription: e.target.value })} className="mt-1 block w-full rounded-lg border px-3 py-2" />
               </div>
             </div>
           </div>
@@ -100,32 +132,18 @@ export default function AdminCampanhaEditPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Edição via código</h3>
-                <p className="text-sm text-cdl-gray-text mb-3">
-                  Para editar o conteúdo completo desta campanha, edite o arquivo:
-                </p>
-                <code className="block text-xs bg-white px-3 py-2 rounded border border-yellow-200 mb-3">
-                  frontend/src/app/institucional/campanhas/[slug]/page.tsx
-                </code>
-                <p className="text-sm text-cdl-gray-text">
-                  Em breve, esta funcionalidade será integrada ao banco de dados para permitir edição completa via interface administrativa.
-                </p>
+                <h3 className="font-semibold text-gray-900 mb-1">Edição via interface</h3>
+                <p className="text-sm text-cdl-gray-text mb-3">Edite os campos acima e clique em salvar para atualizar a campanha no Firebase.</p>
+                <p className="text-sm text-cdl-gray-text">A edição via código ainda funciona e pode ser usada como backup.</p>
               </div>
             </div>
           </div>
 
           <div className="flex gap-4">
-            <Link
-              href={`/institucional/campanhas/${campanha.id}`}
-              target="_blank"
-              className="btn-secondary"
-            >
-              Ver página pública
-            </Link>
-            <Link href="/admin/campanhas" className="btn-primary">
-              Voltar à listagem
-            </Link>
+            <button onClick={handleSave} disabled={saving} className="btn-primary">{saving ? 'Salvando...' : 'Salvar'}</button>
+            <Link href={`/institucional/campanhas/${campanha.id}`} target="_blank" className="btn-secondary">Ver página pública</Link>
           </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
       </div>
     </div>
