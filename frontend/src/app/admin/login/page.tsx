@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { initFirebase } from '@/lib/firebase';
+import { apiPost } from '@/lib/api';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -18,11 +17,11 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
     try {
-      initFirebase();
-      const auth = getAuth();
-      const userCred = await signInWithEmailAndPassword(auth, (email || '').trim(), password || '');
-      const idToken = await userCred.user.getIdToken();
-      localStorage.setItem('cdl_admin_token', idToken);
+      const res = await apiPost<{ token: string; user: { id: string; email: string; name?: string } }>(
+        '/auth/login',
+        { email: email.trim(), password }
+      );
+      localStorage.setItem('cdl_admin_token', res.token);
       router.push('/admin');
     } catch (err: any) {
       console.error('Login error', err);

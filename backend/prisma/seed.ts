@@ -16,6 +16,18 @@ async function main() {
     update: {},
   });
 
+  // usuário exemplo solicitado (cdlpauloafonsoba@gmail.com)
+  const hashedCdl = await bcrypt.hash('cdl49426@cdl', 10);
+  await prisma.user.upsert({
+    where: { email: 'cdlpauloafonsoba@gmail.com' },
+    create: {
+      email: 'cdlpauloafonsoba@gmail.com',
+      password: hashedCdl,
+      name: 'Admin CDL Paulo Afonso',
+    },
+    update: {},
+  });
+
   const defaultPages = [
     {
       slug: 'diretoria',
