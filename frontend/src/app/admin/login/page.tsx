@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'admin123';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { initFirebase } from '@/lib/firebase';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -14,19 +13,23 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const user = (email || '').trim().toLowerCase();
-    const pass = password || '';
-    if ((user === ADMIN_USER || user === 'admin@cdlpauloafonso.com.br') && pass === ADMIN_PASS) {
-      localStorage.setItem('cdl_admin_token', 'mock-admin-token');
+    try {
+      initFirebase();
+      const auth = getAuth();
+      const userCred = await signInWithEmailAndPassword(auth, (email || '').trim(), password || '');
+      const idToken = await userCred.user.getIdToken();
+      localStorage.setItem('cdl_admin_token', idToken);
       router.push('/admin');
-    } else {
-      setError('Usuário ou senha incorretos');
+    } catch (err: any) {
+      console.error('Login error', err);
+      setError(err?.message || 'Erro ao autenticar. Verifique suas credenciais.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
@@ -36,7 +39,7 @@ export default function AdminLoginPage() {
           <Image src="/logo.png" alt="CDL Paulo Afonso" width={102} height={37} className="h-10 w-auto object-contain" />
         </div>
         <h1 className="text-xl font-bold text-center text-gray-900">Área administrativa</h1>
-        <p className="mt-1 text-sm text-center text-cdl-gray-text">Faça login para continuar</p>
+        <p className="mt-1 text-sm text-center text-cdl-gray-text">Faça login com sua conta</p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           {error && (
             <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-800">
@@ -69,6 +72,9 @@ export default function AdminLoginPage() {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+        <div className="mt-4 text-xs text-cdl-gray-text text-center">
+          Use a conta de administrador configurada via Firebase.
+        </div>
       </div>
     </div>
   );
