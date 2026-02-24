@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { apiPost } from '@/lib/api';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -12,20 +11,22 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Mocked admin access (temporary)
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await apiPost<{ token: string; user: { id: string; email: string; name?: string } }>(
-        '/auth/login',
-        { email: email.trim(), password }
-      );
-      localStorage.setItem('cdl_admin_token', res.token);
-      router.push('/admin');
+      const user = (email || '').trim().toLowerCase();
+      const pass = password || '';
+      if (user === 'admin@cdlpauloafonso.com.br' && pass === 'admin123') {
+        localStorage.setItem('cdl_admin_token', 'mock-admin-token');
+        router.push('/admin');
+      } else {
+        setError('Usuário ou senha incorretos');
+      }
     } catch (err: any) {
-      console.error('Login error', err);
-      setError(err?.message || 'Erro ao autenticar. Verifique suas credenciais.');
+      setError('Erro ao autenticar');
     } finally {
       setLoading(false);
     }
@@ -38,7 +39,7 @@ export default function AdminLoginPage() {
           <Image src="/logo.png" alt="CDL Paulo Afonso" width={102} height={37} className="h-10 w-auto object-contain" />
         </div>
         <h1 className="text-xl font-bold text-center text-gray-900">Área administrativa</h1>
-        <p className="mt-1 text-sm text-center text-cdl-gray-text">Faça login com sua conta</p>
+        <p className="mt-1 text-sm text-center text-cdl-gray-text">Faça login para continuar</p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           {error && (
             <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-800">
@@ -72,7 +73,7 @@ export default function AdminLoginPage() {
           </button>
         </form>
         <div className="mt-4 text-xs text-cdl-gray-text text-center">
-          Use a conta de administrador configurada via Firebase.
+          Modo MOCK ativo — use admin@cdlpauloafonso.com.br / admin123
         </div>
       </div>
     </div>
