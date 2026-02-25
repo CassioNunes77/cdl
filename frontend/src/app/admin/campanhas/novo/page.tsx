@@ -50,9 +50,72 @@ export default function AdminNewCampaignPage() {
         setImageError('Chave de upload não configurada');
         return;
       }
+      // Compress / resize image in browser before upload to save bandwidth and speed up delivery.
+      async function compressImage(input: File, maxDim = 1600, quality = 0.75): Promise<Blob | null> {
+        // Try using createImageBitmap for better performance
+        try {
+          const bitmap = await createImageBitmap(input);
+          const { width, height } = bitmap;
+          let targetWidth = width;
+          let targetHeight = height;
+          if (width > maxDim || height > maxDim) {
+            const ratio = Math.min(maxDim / width, maxDim / height);
+            targetWidth = Math.round(width * ratio);
+            targetHeight = Math.round(height * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return null;
+          ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+          // Prefer webp if supported for smaller size
+          const outputType = 'image/webp';
+          return await new Promise<Blob | null>((resolve) => {
+            // Try webp first; if not supported, fall back to jpeg
+            canvas.toBlob((blob) => {
+              if (blob) return resolve(blob);
+              canvas.toBlob((blob2) => resolve(blob2), 'image/jpeg', quality);
+            }, outputType, quality);
+          });
+        } catch (e) {
+          // Fallback using Image element
+          return await new Promise<Blob | null>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              let w = img.width;
+              let h = img.height;
+              if (w > maxDim || h > maxDim) {
+                const r = Math.min(maxDim / w, maxDim / h);
+                w = Math.round(w * r);
+                h = Math.round(h * r);
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) return resolve(null);
+              ctx.drawImage(img, 0, 0, w, h);
+              canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+            };
+            img.onerror = () => resolve(null);
+            img.src = URL.createObjectURL(input);
+          });
+        }
+      }
+
+      const compressed = await compressImage(file, 1600, 0.75);
+      const toUpload = compressed && compressed.size > 0 ? compressed : file;
       const form = new FormData();
       // imgbb accepts multipart/form-data with field 'image' (binary or base64)
-      form.append('image', file);
+      // If we have a blob, provide a filename to preserve extension
+      if (toUpload instanceof Blob && !(toUpload instanceof File)) {
+        const filename = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
+        form.append('image', toUpload, filename);
+      } else {
+        form.append('image', toUpload as File);
+      }
+
       const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
         method: 'POST',
         body: form,
