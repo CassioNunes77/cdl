@@ -10,9 +10,9 @@ IMPORTANTE: Nunca comite o arquivo da service account (`service-account.json`) n
 2. Acesse "Authentication" → "Users".
 3. Clique em "Add user".
 4. Preencha:
-   - Email: `cdlpauloafonsoba@gmail.com`
-   - Password: escolha uma senha forte (ex.: `cdl49426@cdl`) ou outra de sua preferência.
-   - (Opcional) marque "Email verified".
+  - Email: `cdlpauloafonsoba@gmail.com`
+  - Password: escolha uma senha forte e única; não inclua senhas de exemplo neste repositório.
+  - (Opcional) marque "Email verified".
 5. Salve.
 
 ## Passo 2 — Atribuir claim `admin: true` (recomendado)
@@ -40,6 +40,30 @@ Opções para executar o script:
      ```
 
 O script retornará confirmação ao terminar.
+
+## Regras de segurança do Firestore (recomendado)
+
+Incluí um conjunto de regras de segurança de exemplo em `firebase/firestore.rules` no repositório. Essas regras fazem o seguinte:
+- Permitem leitura pública da coleção `campaigns` (página pública).
+- Permitem criação/atualização/exclusão em `campaigns` somente para administradores.
+- Consideram um usuário administrador quando:
+  - o token do Firebase Authentication contém `admin: true` (custom claim), ou
+  - existe um documento em `/admins/{uid}` para o `uid` autenticado.
+
+Essas regras protegem seu conteúdo quando o frontend usa o SDK do Firestore diretamente.
+
+### Como aplicar as regras no seu projeto Firebase
+
+1. Instale a CLI do Firebase (se necessário) ou use Cloud Shell:
+   - Localmente: `npm install -g firebase-tools`
+   - Cloud Shell: já possui `firebase` disponível
+2. Faça login: `firebase login`
+3. Inicialize/prepare (se ainda não tiver):
+   - `firebase init firestore` (siga as instruções e selecione o arquivo `firebase/firestore.rules` quando solicitado)
+4. Ou apenas faça deploy das regras:
+   - `firebase deploy --only firestore:rules --project YOUR_PROJECT_ID`
+
+> Observação: substitua YOUR_PROJECT_ID pelo ID do seu projeto Firebase (ex.: `sitecdl`).
 
 ## Observação de segurança
 
