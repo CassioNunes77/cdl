@@ -9,11 +9,16 @@ export default function AdminNewCampaignPage() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageError, setImageError] = useState('');
   const [fullDescription, setFullDescription] = useState('');
   const [date, setDate] = useState('');
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const IMGBB_KEY = '3e34a6ca9632f3ab47a6553e7fe55d51';
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,12 +31,38 @@ export default function AdminNewCampaignPage() {
         fullDescription: fullDescription || undefined,
         date: date || undefined,
         category: category || undefined,
+        image: imageUrl || undefined,
       });
       router.push('/admin/campanhas');
     } catch (err) {
       setError('Erro ao criar campanha');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function uploadImageFile(file?: File | null) {
+    if (!file) return;
+    setImageError('');
+    setImageUploading(true);
+    try {
+      const form = new FormData();
+      // imgbb accepts multipart/form-data with field 'image' (binary or base64)
+      form.append('image', file);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+        method: 'POST',
+        body: form,
+      });
+      const data = await res.json();
+      if (data && data.data && data.data.url) {
+        setImageUrl(data.data.url);
+      } else {
+        setImageError('Erro ao enviar imagem');
+      }
+    } catch (e) {
+      setImageError('Erro ao enviar imagem');
+    } finally {
+      setImageUploading(false);
     }
   }
 
@@ -59,6 +90,26 @@ export default function AdminNewCampaignPage() {
             rows={2}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Foto destaque</label>
+          <div className="mt-1 flex items-center gap-3">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                if (file) uploadImageFile(file);
+              }}
+            />
+            {imageUploading && <span className="text-sm text-cdl-gray-text">Enviando...</span>}
+            {imageError && <span className="text-sm text-red-600">{imageError}</span>}
+          </div>
+          {imageUrl && (
+            <div className="mt-3">
+              <img src={imageUrl} alt="preview" className="w-48 h-auto rounded-md border" />
+            </div>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Descrição completa</label>
