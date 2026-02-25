@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { initFirebase } from '@/lib/firebase';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -22,16 +23,28 @@ export default function AdminLoginPage() {
       const auth = getAuth();
       const cred = await signInWithEmailAndPassword(auth, (email || '').trim(), password || '');
       const idTokenResult = await cred.user.getIdTokenResult();
-      const isAdmin = !!(idTokenResult.claims && idTokenResult.claims.admin);
-      if (!isAdmin) {
-        await auth.signOut();
-        setError('Acesso não autorizado');
-        setLoading(false);
+      const isClaimAdmin = !!(idTokenResult.claims && idTokenResult.claims.admin);
+
+      if (isClaimAdmin) {
+        const idToken = await cred.user.getIdToken();
+        localStorage.setItem('cdl_admin_token', idToken);
+        router.push('/admin');
         return;
       }
-      const idToken = await cred.user.getIdToken();
-      localStorage.setItem('cdl_admin_token', idToken);
-      router.push('/admin');
+
+      // Fallback: check /admins/{uid} in Firestore
+      const db = getFirestore();
+      const adminDoc = await getDoc(doc(db, 'admins', cred.user.uid));
+      if (adminDoc.exists()) {
+        const idToken = await cred.user.getIdToken();
+        localStorage.setItem('cdl_admin_token', idToken);
+        router.push('/admin');
+        return;
+      }
+
+      // No admin claim or admin doc found
+      await auth.signOut();
+      setError('Acesso não autorizado');
     } catch (err: any) {
       setError(err?.message || 'Erro ao autenticar');
     } finally {
