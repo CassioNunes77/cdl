@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { initFirebase } from '@/lib/firebase';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -11,22 +13,27 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Mocked admin access (temporary)
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const user = (email || '').trim().toLowerCase();
-      const pass = password || '';
-      if (user === 'admin@cdlpauloafonso.com.br' && pass === 'admin123') {
-        localStorage.setItem('cdl_admin_token', 'mock-admin-token');
-        router.push('/admin');
-      } else {
-        setError('Usuário ou senha incorretos');
+      initFirebase();
+      const auth = getAuth();
+      const cred = await signInWithEmailAndPassword(auth, (email || '').trim(), password || '');
+      const idTokenResult = await cred.user.getIdTokenResult();
+      const isAdmin = !!(idTokenResult.claims && idTokenResult.claims.admin);
+      if (!isAdmin) {
+        await auth.signOut();
+        setError('Acesso não autorizado');
+        setLoading(false);
+        return;
       }
+      const idToken = await cred.user.getIdToken();
+      localStorage.setItem('cdl_admin_token', idToken);
+      router.push('/admin');
     } catch (err: any) {
-      setError('Erro ao autenticar');
+      setError(err?.message || 'Erro ao autenticar');
     } finally {
       setLoading(false);
     }
