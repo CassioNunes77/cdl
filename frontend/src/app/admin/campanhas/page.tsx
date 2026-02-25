@@ -40,18 +40,10 @@ export default function AdminCampanhasPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Campanhas</h1>
-          <p className="mt-1 text-sm text-cdl-gray-text">Gerencie as campanhas e eventos promovidos pela CDL</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/institucional/campanhas" target="_blank" className="btn-secondary">
-            Ver página pública
-          </Link>
-          <Link href="/admin/campanhas/novo" className="btn-primary">
-            Nova campanha
-          </Link>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900">Campanhas</h1>
+        <Link href="/admin/campanhas/novo" className="btn-primary">
+          Nova campanha
+        </Link>
       </div>
 
       {loading ? (
