@@ -61,7 +61,7 @@ export default function AdminCampanhasPage() {
                     <Link href={`/institucional/campanhas/${campanha.id}`} target="_blank" className="flex-1 text-center px-3 py-2 text-sm text-cdl-blue hover:bg-cdl-blue/10 rounded-lg transition-colors">
                       Ver página
                     </Link>
-                    <Link href={`/admin/campanhas/${campanha.id}`} className="flex-1 text-center px-3 py-2 text-sm bg-cdl-blue text-white hover:bg-cdl-blue-dark rounded-lg transition-colors">
+                    <Link href={`/admin/campanhas/edit?id=${campanha.id}`} className="flex-1 text-center px-3 py-2 text-sm bg-cdl-blue text-white hover:bg-cdl-blue-dark rounded-lg transition-colors">
                       Editar
                     </Link>
                     <button onClick={() => handleDelete(campanha.id)} className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg">
