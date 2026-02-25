@@ -53,20 +53,34 @@ export async function getCampaign(id: string): Promise<Campaign | null> {
 export async function createCampaign(data: Campaign) {
   const db = getDb();
   const col = collection(db, 'campaigns');
-  const ref = await addDoc(col, data);
+  // remove undefined fields to avoid Firestore errors
+  const payload: Record<string, any> = {};
+  Object.entries(data).forEach(([k, v]) => {
+    if (v !== undefined) payload[k] = v;
+  });
+  const ref = await addDoc(col, payload);
   return ref.id;
 }
 
 export async function updateCampaign(id: string, data: Partial<Campaign>) {
   const db = getDb();
   const ref = doc(db, 'campaigns', id);
-  await updateDoc(ref, data as any);
+  // remove undefined fields
+  const payload: Record<string, any> = {};
+  Object.entries(data as Record<string, any>).forEach(([k, v]) => {
+    if (v !== undefined) payload[k] = v;
+  });
+  await updateDoc(ref, payload as any);
 }
 
 export async function setCampaign(id: string, data: Campaign) {
   const db = getDb();
   const ref = doc(db, 'campaigns', id);
-  await setDoc(ref, data as any);
+  const payload: Record<string, any> = {};
+  Object.entries(data).forEach(([k, v]) => {
+    if (v !== undefined) payload[k] = v;
+  });
+  await setDoc(ref, payload as any);
 }
 
 export async function deleteCampaignById(id: string) {
