@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getCampaign, updateCampaign, Campaign } from '@/lib/firestore';
 
+// imgbb upload key
+const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY;
+
 export default function AdminCampanhaEditByQueryPage() {
   const search = useSearchParams();
   const id = search.get('id') ?? '';
@@ -12,6 +15,8 @@ export default function AdminCampanhaEditByQueryPage() {
   const [campanha, setCampanha] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageError, setImageError] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -71,6 +76,95 @@ export default function AdminCampanhaEditByQueryPage() {
     }
   }
 
+  async function uploadImageFile(file?: File | null) {
+    if (!file) return;
+    setImageError('');
+    setImageUploading(true);
+    try {
+      if (!IMGBB_KEY) {
+        setImageError('Chave de upload não configurada');
+        return;
+      }
+      // compress + resize (reuse same approach as novo)
+      const compressImage = async (input: File, maxDim = 1600, quality = 0.75): Promise<Blob | null> => {
+        try {
+          const bitmap = await createImageBitmap(input);
+          const { width, height } = bitmap;
+          let targetWidth = width;
+          let targetHeight = height;
+          if (width > maxDim || height > maxDim) {
+            const ratio = Math.min(maxDim / width, maxDim / height);
+            targetWidth = Math.round(width * ratio);
+            targetHeight = Math.round(height * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return null;
+          ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+          const outputType = 'image/webp';
+          return await new Promise<Blob | null>((resolve) => {
+            canvas.toBlob((blob) => {
+              if (blob) return resolve(blob);
+              canvas.toBlob((blob2) => resolve(blob2), 'image/jpeg', quality);
+            }, outputType, quality);
+          });
+        } catch (e) {
+          return await new Promise<Blob | null>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              let w = img.width;
+              let h = img.height;
+              if (w > maxDim || h > maxDim) {
+                const r = Math.min(maxDim / w, maxDim / h);
+                w = Math.round(w * r);
+                h = Math.round(h * r);
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) return resolve(null);
+              ctx.drawImage(img, 0, 0, w, h);
+              canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+            };
+            img.onerror = () => resolve(null);
+            img.src = URL.createObjectURL(input);
+          });
+        }
+      };
+
+      const compressed = await compressImage(file, 1600, 0.75);
+      const toUpload = compressed && (compressed as Blob).size > 0 ? compressed : file;
+      const form = new FormData();
+      if (toUpload instanceof Blob && !(toUpload instanceof File)) {
+        const filename = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
+        form.append('image', toUpload, filename);
+      } else {
+        form.append('image', toUpload as File);
+      }
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+        method: 'POST',
+        body: form,
+      });
+      const data = await res.json();
+      if (data && data.data && data.data.url) {
+        setCampanha((c) => (c ? { ...c, image: data.data.url } : c));
+      } else {
+        setImageError('Erro ao enviar imagem');
+      }
+    } catch (e) {
+      setImageError('Erro ao enviar imagem');
+    } finally {
+      setImageUploading(false);
+    }
+  }
+
+  function removeImage() {
+    setCampanha((c) => (c ? { ...c, image: undefined } : c));
+  }
+
   return (
     <div>
       <Link href="/admin/campanhas" className="text-sm text-cdl-blue hover:underline mb-4 inline-block">← Voltar às campanhas</Link>
@@ -110,6 +204,31 @@ export default function AdminCampanhaEditByQueryPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Descrição Completa</label>
                 <textarea value={campanha.fullDescription} onChange={(e) => setCampanha({ ...campanha, fullDescription: e.target.value })} className="mt-1 block w-full rounded-lg border px-3 py-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Foto destaque</label>
+                <div className="mt-1 flex items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+                      if (file) uploadImageFile(file);
+                    }}
+                  />
+                  {imageUploading && <span className="text-sm text-cdl-gray-text">Enviando...</span>}
+                  {imageError && <span className="text-sm text-red-600">{imageError}</span>}
+                  {campanha.image && (
+                    <button type="button" onClick={removeImage} className="text-sm text-red-600 hover:underline">
+                      Remover foto
+                    </button>
+                  )}
+                </div>
+                {campanha.image && (
+                  <div className="mt-3">
+                    <img src={campanha.image} alt="preview" className="w-48 h-auto rounded-md border" />
+                  </div>
+                )}
               </div>
             </div>
           </div>
