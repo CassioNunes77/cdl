@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createCampaign } from '@/lib/firestore';
+import { initFirebase } from '@/lib/firebase';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 export default function AdminNewCampaignPage() {
   const router = useRouter();
@@ -25,7 +28,28 @@ export default function AdminNewCampaignPage() {
     setLoading(true);
     setError('');
     try {
-      await createCampaign({
+      // ensure Firebase initialized and user is admin (either claim or /admins/{uid})
+      initFirebase();
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        setError('Você precisa estar logado como administrador');
+        setLoading(false);
+        return;
+      }
+      const idTokenResult = await user.getIdTokenResult();
+      const isClaimAdmin = !!(idTokenResult.claims && idTokenResult.claims.admin);
+      if (!isClaimAdmin) {
+        const db = getFirestore();
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        if (!adminDoc.exists()) {
+          setError('Acesso não autorizado');
+          setLoading(false);
+          return;
+        }
+      }
+
+      const id = await createCampaign({
         title,
         description,
         fullDescription: fullDescription || undefined,
@@ -34,8 +58,9 @@ export default function AdminNewCampaignPage() {
         image: imageUrl || undefined,
       });
       router.push('/admin/campanhas');
-    } catch (err) {
-      setError('Erro ao criar campanha');
+    } catch (err: any) {
+      const msg = err?.message || 'Erro ao criar campanha';
+      setError(msg);
     } finally {
       setLoading(false);
     }
