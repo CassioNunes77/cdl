@@ -29,6 +29,8 @@ export type Campaign = {
   category?: string;
   highlights?: string[];
   benefits?: string[];
+  howToParticipate?: string;
+  contact?: string;
 };
 
 export async function listCampaigns(): Promise<Campaign[]> {

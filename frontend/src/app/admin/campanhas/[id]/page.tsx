@@ -2,43 +2,6 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-
-const campanhasData: Record<string, {
-  id: string;
-  title: string;
-  description: string;
-  fullDescription: string;
-  date: string;
-  category: string;
-}> = {
-  'cafe-com-elas': {
-    id: 'cafe-com-elas',
-    title: 'Café com Elas',
-    description: 'Um encontro especial dedicado às mulheres empreendedoras de Paulo Afonso.',
-    fullDescription: 'O Café com Elas é um evento periódico promovido pela CDL Paulo Afonso com o objetivo de fortalecer o empreendedorismo feminino na nossa cidade.',
-    date: 'Evento periódico',
-    category: 'Networking',
-  },
-  'sao-joao-comercio': {
-    id: 'sao-joao-comercio',
-    title: 'São João do Comércio',
-    description: 'A maior festa junina do comércio de Paulo Afonso!',
-    fullDescription: 'O São João do Comércio é uma das principais campanhas promovidas pela CDL Paulo Afonso durante o período junino.',
-    date: 'Junho',
-    category: 'Festival',
-  },
-  'natal-premiado-cdl': {
-    id: 'natal-premiado-cdl',
-    title: 'Natal Premiado CDL',
-    description: 'A campanha de Natal que movimenta o comércio de Paulo Afonso!',
-    fullDescription: 'O Natal Premiado CDL é a maior campanha promocional do ano, realizada durante os meses de novembro e dezembro.',
-    date: 'Novembro - Dezembro',
-    category: 'Campanha',
-  },
-};
-
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getCampaign, updateCampaign, Campaign } from '@/lib/firestore';
 
@@ -80,6 +43,7 @@ export default function AdminCampanhaEditPage() {
   }
 
   async function handleSave() {
+    if (!campanha) return;
     setSaving(true);
     setError('');
     try {
