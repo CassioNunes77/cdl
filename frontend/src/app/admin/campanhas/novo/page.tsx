@@ -18,7 +18,7 @@ export default function AdminNewCampaignPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const IMGBB_KEY = '3e34a6ca9632f3ab47a6553e7fe55d51';
+  const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,6 +46,10 @@ export default function AdminNewCampaignPage() {
     setImageError('');
     setImageUploading(true);
     try {
+      if (!IMGBB_KEY) {
+        setImageError('Chave de upload não configurada');
+        return;
+      }
       const form = new FormData();
       // imgbb accepts multipart/form-data with field 'image' (binary or base64)
       form.append('image', file);
