@@ -87,6 +87,14 @@ export default function AdminCampanhaEditByQueryPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
                 <input value={campanha.title} onChange={(e) => setCampanha({ ...campanha, title: e.target.value })} className="mt-1 block w-full rounded-lg border px-3 py-2" />
               </div>
+            {campanha.image && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Foto destaque</label>
+                <div className="mt-1">
+                  <img src={campanha.image} alt="Foto destaque" className="w-48 h-auto rounded-md border" />
+                </div>
+              </div>
+            )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
                 <input value={campanha.category} onChange={(e) => setCampanha({ ...campanha, category: e.target.value })} className="mt-1 block w-full rounded-lg border px-3 py-2" />

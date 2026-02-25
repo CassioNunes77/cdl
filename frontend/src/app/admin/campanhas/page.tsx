@@ -74,6 +74,11 @@ export default function AdminCampanhasPage() {
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((campanha) => (
               <div key={campanha.id} className="rounded-xl border border-gray-200 bg-white overflow-hidden hover:shadow-md transition-all">
+                {campanha.image && (
+                  <div className="h-40 w-full overflow-hidden">
+                    <img src={campanha.image} alt={campanha.title} className="w-full h-40 object-cover" />
+                  </div>
+                )}
                 <div className="p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-2">{campanha.title}</h3>
                   <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-cdl-blue text-white mb-3">{campanha.category}</span>
