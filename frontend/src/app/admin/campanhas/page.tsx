@@ -3,6 +3,9 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { listCampaigns, deleteCampaignById, Campaign } from '@/lib/firestore';
+import { initFirebase } from '@/lib/firebase';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 export default function AdminCampanhasPage() {
   const [items, setItems] = useState<Campaign[]>([]);
@@ -30,6 +33,24 @@ export default function AdminCampanhasPage() {
     if (!id) return;
     if (!confirm('Excluir esta campanha?')) return;
     try {
+      // verify admin before attempting delete
+      initFirebase();
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        setError('Você precisa estar logado como administrador');
+        return;
+      }
+      const idTokenResult = await user.getIdTokenResult();
+      const isClaimAdmin = !!(idTokenResult.claims && idTokenResult.claims.admin);
+      if (!isClaimAdmin) {
+        const db = getFirestore();
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        if (!adminDoc.exists()) {
+          setError('Acesso não autorizado');
+          return;
+        }
+      }
       await deleteCampaignById(id);
       setItems((s) => s.filter((c) => c.id !== id));
     } catch {
