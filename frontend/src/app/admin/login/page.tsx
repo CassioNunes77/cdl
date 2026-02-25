@@ -80,7 +80,7 @@ export default function AdminLoginPage() {
           </button>
         </form>
         <div className="mt-4 text-xs text-cdl-gray-text text-center">
-          Modo MOCK ativo — use admin@cdlpauloafonso.com.br / admin123
+          Use suas credenciais de administrador (Firebase Auth).
         </div>
       </div>
     </div>
