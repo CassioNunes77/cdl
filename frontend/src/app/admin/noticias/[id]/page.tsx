@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { apiGet, apiPut, apiPost, type NewsItem, type NewsLink } from '@/lib/api';
 import { slugifyUnique } from '@/lib/slug';
 
+const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY;
+
 export default function AdminNoticiaEditPage() {
   const params = useParams();
   const router = useRouter();
@@ -24,6 +26,8 @@ export default function AdminNoticiaEditPage() {
   const [existingSlugs, setExistingSlugs] = useState<string[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageError, setImageError] = useState('');
   const slugManuallyEdited = useRef(false);
 
   useEffect(() => {
@@ -70,6 +74,83 @@ export default function AdminNoticiaEditPage() {
       }
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function uploadImageFile(file: File) {
+    setImageError('');
+    setImageUploading(true);
+    try {
+      if (!IMGBB_KEY) {
+        setImageError('Chave de upload não configurada');
+        setImageUploading(false);
+        return;
+      }
+      const maxDim = 1200;
+      const quality = 0.55;
+      const compressImage = async (input: File): Promise<Blob | null> => {
+        try {
+          const bitmap = await createImageBitmap(input);
+          const { width, height } = bitmap;
+          let w = width;
+          let h = height;
+          if (width > maxDim || height > maxDim) {
+            const r = Math.min(maxDim / width, maxDim / height);
+            w = Math.round(width * r);
+            h = Math.round(height * r);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return null;
+          ctx.drawImage(bitmap, 0, 0, w, h);
+          return await new Promise<Blob | null>((resolve) => {
+            canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+          });
+        } catch {
+          return await new Promise<Blob | null>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              let w = img.width;
+              let h = img.height;
+              if (w > maxDim || h > maxDim) {
+                const r = Math.min(maxDim / w, maxDim / h);
+                w = Math.round(w * r);
+                h = Math.round(h * r);
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) return resolve(null);
+              ctx.drawImage(img, 0, 0, w, h);
+              canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+            };
+            img.onerror = () => resolve(null);
+            img.src = URL.createObjectURL(input);
+          });
+        }
+      };
+      const compressed = await compressImage(file);
+      const toUpload = compressed && compressed.size > 0 ? compressed : file;
+      const form = new FormData();
+      if (toUpload instanceof Blob && !(toUpload instanceof File)) {
+        form.append('image', toUpload, (file.name.replace(/\.[^/.]+$/, '') || 'image') + '.jpg');
+      } else {
+        form.append('image', toUpload as File);
+      }
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: 'POST', body: form });
+      const data = await res.json();
+      if (data?.data?.url) {
+        setNews((n) => ({ ...n, image: data.data.url }));
+      } else {
+        setImageError('Erro ao enviar imagem');
+      }
+    } catch {
+      setImageError('Erro ao enviar imagem');
+    } finally {
+      setImageUploading(false);
     }
   }
 
@@ -131,13 +212,29 @@ export default function AdminNoticiaEditPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">URL da imagem</label>
-          <input
-            type="text"
-            value={news.image ?? ''}
-            onChange={(e) => setNews((n) => ({ ...n, image: e.target.value }))}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-          />
+          <label className="block text-sm font-medium text-gray-700">Foto destaque</label>
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                if (file) uploadImageFile(file);
+              }}
+            />
+            {imageUploading && <span className="text-sm text-cdl-gray-text">Enviando...</span>}
+            {imageError && <span className="text-sm text-red-600">{imageError}</span>}
+            {news.image && (
+              <button type="button" onClick={() => setNews((n) => ({ ...n, image: '' }))} className="text-sm text-red-600 hover:underline">
+                Remover foto
+              </button>
+            )}
+          </div>
+          {news.image && (
+            <div className="mt-3">
+              <img src={news.image} alt="Preview" className="w-48 h-auto rounded-md border" />
+            </div>
+          )}
         </div>
         
         {/* Seção de Links */}
