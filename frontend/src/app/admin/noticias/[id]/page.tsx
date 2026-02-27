@@ -28,6 +28,7 @@ export default function AdminNoticiaEditPage() {
   const [saving, setSaving] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [imageError, setImageError] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const slugManuallyEdited = useRef(false);
 
   useEffect(() => {
@@ -54,14 +55,20 @@ export default function AdminNoticiaEditPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitError('');
     setSaving(true);
     const token = localStorage.getItem('cdl_admin_token');
     const links = news.links && Array.isArray(news.links) && news.links.length > 0 
       ? news.links.filter((link: NewsLink) => link.label && link.url)
       : null;
     const payload = {
-      ...news,
+      title: news.title,
+      slug: news.slug,
+      excerpt: news.excerpt,
+      content: news.content,
+      image: news.image || null,
       links,
+      published: (news as { published?: boolean }).published ?? true,
       publishedAt: news.publishedAt ? new Date(news.publishedAt).toISOString() : new Date().toISOString(),
     };
     try {
@@ -72,6 +79,9 @@ export default function AdminNoticiaEditPage() {
         await apiPut(`/news/${id}`, payload, token);
         router.push('/admin/noticias');
       }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao salvar';
+      setSubmitError(message);
     } finally {
       setSaving(false);
     }
@@ -364,6 +374,9 @@ export default function AdminNoticiaEditPage() {
           />
           <label htmlFor="published" className="text-sm text-gray-700">Publicado</label>
         </div>
+        {submitError && (
+          <p className="text-red-600 text-sm" role="alert">{submitError}</p>
+        )}
         <button type="submit" disabled={saving} className="btn-primary">
           {saving ? 'Salvando...' : 'Salvar'}
         </button>
