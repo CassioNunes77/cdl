@@ -27,6 +27,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (typeof document !== 'undefined' && pathname.startsWith('/admin')) {
+      document.title = 'Painel ADM | CDL';
+    }
+  }, [pathname]);
+
   if (!mounted) return null;
 
   const isLogin = pathname === '/admin' && !pathname.startsWith('/admin/');

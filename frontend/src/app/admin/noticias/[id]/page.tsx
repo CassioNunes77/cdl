@@ -13,7 +13,7 @@ export default function AdminNoticiaEditPage() {
   const router = useRouter();
   const id = params.id as string;
   const isNew = id === 'nova';
-  const [news, setNews] = useState<Partial<NewsItem>>({
+  const [news, setNews] = useState<Partial<NewsItemFirestore>>({
     title: '',
     slug: '',
     excerpt: '',
@@ -80,7 +80,10 @@ export default function AdminNoticiaEditPage() {
         router.push('/admin/noticias');
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erro ao salvar';
+      const raw = err instanceof Error ? err.message : 'Erro ao salvar';
+      const message = raw === 'API não configurada'
+        ? 'Notícias usam Firebase. Faça um novo deploy do frontend e verifique se o Firebase está configurado.'
+        : raw;
       setSubmitError(message);
     } finally {
       setSaving(false);
