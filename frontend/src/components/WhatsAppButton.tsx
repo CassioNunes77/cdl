@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiGet } from '@/lib/api';
+import { getSettings } from '@/lib/firestore';
 
 const STORAGE_KEY = 'cdl_whatsapp_number';
 
@@ -21,14 +21,14 @@ export function WhatsAppButton() {
       const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
 
       try {
-        const settings = await apiGet<Record<string, string>>('/settings');
+        const settings = await getSettings();
         const apiNum = settings?.whatsapp_number?.trim();
         if (apiNum) {
           setNumber(formatWhatsAppNumber(apiNum));
           return;
         }
       } catch {
-        // API não disponível
+        // Firestore não disponível
       }
 
       if (stored) {

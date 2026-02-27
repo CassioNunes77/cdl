@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { apiGet, apiPut, apiPost, type NewsItem, type NewsLink } from '@/lib/api';
+import { getNewsById, listNews, createNews, updateNews, type NewsItemFirestore, type NewsLink } from '@/lib/firestore';
 import { slugifyUnique } from '@/lib/slug';
 
 const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY;
@@ -33,23 +33,22 @@ export default function AdminNoticiaEditPage() {
 
   useEffect(() => {
     if (isNew) return;
-    const token = localStorage.getItem('cdl_admin_token');
-    apiGet<NewsItem>(`/news/by-id/${id}`, token)
+    getNewsById(id)
       .then((n) => {
-        setNews({
-          ...n,
-          publishedAt: n.publishedAt ? n.publishedAt.slice(0, 10) : '',
-          links: n.links || [],
-        });
+        if (n)
+          setNews({
+            ...n,
+            publishedAt: n.publishedAt ? n.publishedAt.slice(0, 10) : '',
+            links: n.links || [],
+          });
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id, isNew]);
 
   useEffect(() => {
-    const token = localStorage.getItem('cdl_admin_token');
-    apiGet<{ items: NewsItem[] }>('/news?limit=200', token)
-      .then((data) => setExistingSlugs(data.items.map((n) => n.slug).filter(Boolean)))
+    listNews(false, 200)
+      .then((items) => setExistingSlugs(items.map((n) => n.slug).filter(Boolean)))
       .catch(() => {});
   }, []);
 
@@ -57,26 +56,27 @@ export default function AdminNoticiaEditPage() {
     e.preventDefault();
     setSubmitError('');
     setSaving(true);
-    const token = localStorage.getItem('cdl_admin_token');
     const links = news.links && Array.isArray(news.links) && news.links.length > 0 
       ? news.links.filter((link: NewsLink) => link.label && link.url)
       : null;
-    const payload = {
-      title: news.title,
-      slug: news.slug,
-      excerpt: news.excerpt,
-      content: news.content,
+    const published = (news as { published?: boolean }).published ?? true;
+    const publishedAt = news.publishedAt ? new Date(news.publishedAt).toISOString() : new Date().toISOString();
+    const payload: NewsItemFirestore = {
+      title: news.title!,
+      slug: news.slug!,
+      excerpt: news.excerpt!,
+      content: news.content!,
       image: news.image || null,
       links,
-      published: (news as { published?: boolean }).published ?? true,
-      publishedAt: news.publishedAt ? new Date(news.publishedAt).toISOString() : new Date().toISOString(),
+      published,
+      publishedAt,
     };
     try {
       if (isNew) {
-        await apiPost('/news', payload, token);
+        await createNews(payload);
         router.push('/admin/noticias');
       } else {
-        await apiPut(`/news/${id}`, payload, token);
+        await updateNews(id, payload);
         router.push('/admin/noticias');
       }
     } catch (err) {

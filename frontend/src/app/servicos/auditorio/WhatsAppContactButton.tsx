@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiGet } from '@/lib/api';
+import { getSettings } from '@/lib/firestore';
 
 const STORAGE_KEY = 'cdl_whatsapp_number';
 
@@ -23,7 +23,7 @@ export function WhatsAppContactButton({ message }: { message: string }) {
       let number = '';
 
       try {
-        const settings = await apiGet<Record<string, string>>('/settings');
+        const settings = await getSettings();
         const apiNum = settings?.whatsapp_number?.trim();
         if (apiNum) {
           number = formatWhatsAppNumber(apiNum);

@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiGet, apiPut, type SiteSettings } from '@/lib/api';
+import { getSettings, setSettings as saveSettings } from '@/lib/firestore';
 
 const WHATSAPP_STORAGE_KEY = 'cdl_whatsapp_number';
+
+type SiteSettings = Record<string, string>;
 
 const SETTING_KEYS = [
   { key: 'hero_title', label: 'Título do hero (Home)', placeholder: 'A CDL que faz sua empresa...' },
@@ -20,9 +22,7 @@ export default function AdminConfiguracoesPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('cdl_admin_token');
-    if (!token) return;
-    apiGet<SiteSettings>('/settings', token)
+    getSettings()
       .then((data) => {
         const stored = localStorage.getItem(WHATSAPP_STORAGE_KEY);
         if (stored && !data.whatsapp_number) {
@@ -41,7 +41,6 @@ export default function AdminConfiguracoesPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const token = localStorage.getItem('cdl_admin_token');
     const whatsapp = settings.whatsapp_number?.trim();
     if (whatsapp) {
       localStorage.setItem(WHATSAPP_STORAGE_KEY, whatsapp);
@@ -49,8 +48,7 @@ export default function AdminConfiguracoesPage() {
       localStorage.removeItem(WHATSAPP_STORAGE_KEY);
     }
     try {
-      const updated = await apiPut<SiteSettings>('/settings', settings, token);
-      setSettings(updated);
+      await saveSettings(settings);
     } catch {
       setSettings((s) => ({ ...s, whatsapp_number: whatsapp || '' }));
     } finally {

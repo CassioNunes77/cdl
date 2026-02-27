@@ -2,25 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { apiGet, apiDelete, type NewsItem } from '@/lib/api';
+import { listNews, deleteNews, type NewsItemFirestore } from '@/lib/firestore';
 
 export default function AdminNoticiasPage() {
-  const [list, setList] = useState<NewsItem[]>([]);
+  const [list, setList] = useState<NewsItemFirestore[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('cdl_admin_token');
-    if (!token) return;
-    apiGet<{ items: NewsItem[] }>('/news?limit=100', token)
-      .then((res) => setList(res.items ?? []))
+    listNews(false, 100)
+      .then(setList)
       .catch(() => setList([]))
       .finally(() => setLoading(false));
   }, []);
 
   async function remove(id: string) {
     if (!confirm('Excluir esta notícia?')) return;
-    const token = localStorage.getItem('cdl_admin_token');
-    await apiDelete(`/news/${id}`, token);
+    await deleteNews(id);
     setList((prev) => prev.filter((n) => n.id !== id));
   }
 
@@ -45,16 +42,16 @@ export default function AdminNoticiasPage() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {list.map((n) => (
-              <tr key={n.id}>
+              <tr key={n.id!}>
                 <td className="px-4 py-3 text-sm text-gray-900">{n.title}</td>
                 <td className="px-4 py-3 text-sm text-cdl-gray-text">
                   {n.publishedAt ? new Date(n.publishedAt).toLocaleDateString('pt-BR') : '—'}
                 </td>
                 <td className="px-4 py-3 text-right text-sm">
-                  <Link href={`/admin/noticias/${n.id}`} className="text-cdl-blue hover:underline mr-3">
+                  <Link href={`/admin/noticias/${n.id!}`} className="text-cdl-blue hover:underline mr-3">
                     Editar
                   </Link>
-                  <button type="button" onClick={() => remove(n.id)} className="text-red-600 hover:underline">
+                  <button type="button" onClick={() => remove(n.id!)} className="text-red-600 hover:underline">
                     Excluir
                   </button>
                 </td>
