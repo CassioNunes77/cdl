@@ -53,23 +53,21 @@ export function CampaignPageClient({ slug }: { slug: string }) {
           <p className="text-xl text-cdl-gray-text leading-relaxed">{campanha.description}</p>
         </div>
 
-        <div className="relative h-64 sm:h-80 rounded-xl overflow-hidden mb-10 flex items-center justify-center">
+        <div className="rounded-xl overflow-hidden mb-10">
           {campanha.image ? (
-            <div className="absolute inset-0">
-              <img src={campanha.image} alt={campanha.title} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/10" />
-            </div>
+            <img src={campanha.image} alt={campanha.title} className="w-full h-64 sm:h-80 object-cover" />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-cdl-blue/20 to-cdl-blue-dark/20" />
-          )}
-          <div className="relative text-center p-6 z-10">
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <div className="relative h-64 sm:h-80 flex items-center justify-center bg-gradient-to-br from-cdl-blue/20 to-cdl-blue-dark/20">
+              <div className="text-center p-6">
+                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-cdl-blue/10 flex items-center justify-center">
+                  <svg className="w-12 h-12 text-cdl-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-lg font-medium text-cdl-gray-text">{campanha.date}</p>
+              </div>
             </div>
-            <p className="text-lg font-medium text-white">{campanha.date}</p>
-          </div>
+          )}
         </div>
 
         <section className="mb-10">

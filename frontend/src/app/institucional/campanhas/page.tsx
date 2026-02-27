@@ -47,26 +47,30 @@ export default function CampanhasPage() {
                   href={`/institucional/campanhas/${event.id}`}
                   className="group rounded-xl border border-gray-200 bg-white overflow-hidden hover:shadow-lg hover:border-cdl-blue/30 transition-all block"
                 >
-                  <div className="relative h-48 flex items-center justify-center overflow-hidden">
+                  <div className="relative h-48 overflow-hidden">
                     {event.image ? (
-                      <div className="absolute inset-0">
+                      <>
                         <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/20" />
-                      </div>
+                        <div className="absolute top-4 right-4">
+                          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-cdl-blue text-white">{event.category}</span>
+                        </div>
+                      </>
                     ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-cdl-blue/20 to-cdl-blue-dark/20" />
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-br from-cdl-blue/20 to-cdl-blue-dark/20" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-cdl-blue/10 flex items-center justify-center">
+                            <svg className="w-10 h-10 text-cdl-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <p className="text-sm font-medium text-cdl-gray-text">{event.date}</p>
+                        </div>
+                        <div className="absolute top-4 right-4">
+                          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-cdl-blue text-white">{event.category}</span>
+                        </div>
+                      </>
                     )}
-                    <div className="relative z-10 text-center p-6">
-                      <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-medium text-white">{event.date}</p>
-                    </div>
-                    <div className="absolute top-4 right-4 z-20">
-                      <span className="px-3 py-1 text-xs font-semibold rounded-full bg-cdl-blue text-white">{event.category}</span>
-                    </div>
                   </div>
 
                   <div className="p-6">
