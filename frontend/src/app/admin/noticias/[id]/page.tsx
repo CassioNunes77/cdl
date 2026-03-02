@@ -4,6 +4,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getNewsById, listNews, createNews, updateNews, type NewsItemFirestore, type NewsLink } from '@/lib/firestore';
+import { initFirebase } from '@/lib/firebase';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { slugifyUnique } from '@/lib/slug';
 
 const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY;
@@ -72,6 +75,25 @@ export default function AdminNoticiaEditPage() {
       publishedAt,
     };
     try {
+      // Garantir Firebase inicializado e usuário é admin (igual às campanhas)
+      initFirebase();
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        setSubmitError('Você precisa estar logado como administrador');
+        return;
+      }
+      const idTokenResult = await user.getIdTokenResult();
+      const isClaimAdmin = !!(idTokenResult.claims && idTokenResult.claims.admin);
+      if (!isClaimAdmin) {
+        const db = getFirestore();
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        if (!adminDoc.exists()) {
+          setSubmitError('Acesso não autorizado');
+          return;
+        }
+      }
+
       if (isNew) {
         await createNews(payload);
         router.push('/admin/noticias');
@@ -81,9 +103,13 @@ export default function AdminNoticiaEditPage() {
       }
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Erro ao salvar';
-      const message = raw === 'API não configurada'
-        ? 'Notícias usam Firebase. Faça um novo deploy do frontend e verifique se o Firebase está configurado.'
-        : raw;
+      // Notícias usam Firestore (não API); mensagens comuns de erro
+      let message = raw;
+      if (raw === 'API não configurada') {
+        message = 'Notícias usam Firebase. Verifique se o Firebase está configurado e se você está logado como administrador.';
+      } else if (raw.includes('permission') || raw.includes('Permission')) {
+        message = 'Sem permissão. Verifique se está logado como administrador e se as regras do Firestore permitem escrita em /news.';
+      }
       setSubmitError(message);
     } finally {
       setSaving(false);

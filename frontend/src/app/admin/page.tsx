@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiGet } from '@/lib/api';
+import { listNews } from '@/lib/firestore';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<{ pages: number; directors: number; services: number; news: number; messages: number; associates: number } | null>(null);
@@ -10,22 +11,28 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const token = localStorage.getItem('cdl_admin_token');
     if (!token) return;
-    Promise.all([
-      apiGet<unknown[]>('/pages', token),
-      apiGet<unknown[]>('/directors', token),
-      apiGet<unknown[]>('/services', token),
-      apiGet<{ items: unknown[] }>('/news', token),
-      apiGet<unknown[]>('/contact', token),
-      // TODO: Implementar API de associados
-      // apiGet<unknown[]>('/associates', token).catch(() => []),
-    ])
-      .then(([pages, directors, services, newsRes, messages]) => {
+
+    // Notícias usam Firestore (não API) - mesma fonte que o CRUD em /admin/noticias
+    const newsPromise = listNews(false, 500).then((items) => items.length).catch(() => 0);
+
+    // API para páginas, diretoria, serviços, mensagens
+    const apiPromise = Promise.all([
+      apiGet<unknown[]>('/pages', token).catch(() => []),
+      apiGet<unknown[]>('/directors', token).catch(() => []),
+      apiGet<unknown[]>('/services', token).catch(() => []),
+      apiGet<unknown[]>('/contact', token).catch(() => []),
+    ]).then(([pages, directors, services, messages]) => ({
+      pages: (pages as unknown[]).length,
+      directors: (directors as unknown[]).length,
+      services: (services as unknown[]).length,
+      messages: (messages as unknown[]).length,
+    }));
+
+    Promise.all([apiPromise, newsPromise])
+      .then(([apiStats, newsCount]) => {
         setStats({
-          pages: (pages as unknown[]).length,
-          directors: (directors as unknown[]).length,
-          services: (services as unknown[]).length,
-          news: (newsRes as { items: unknown[] }).items?.length ?? 0,
-          messages: (messages as unknown[]).length,
+          ...apiStats,
+          news: newsCount,
           associates: 200, // Valor estático baseado na estatística da homepage
         });
       })
