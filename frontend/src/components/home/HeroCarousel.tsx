@@ -47,13 +47,13 @@ export function HeroCarousel({ slides, autoSlideInterval = 5000 }: HeroCarouselP
   if (slides.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden min-h-[500px] sm:min-h-[600px] lg:min-h-[650px]">
+    <section className="relative overflow-hidden h-[500px] sm:h-[600px] lg:h-[650px]">
       {/* Slides */}
-      <div className="relative min-h-[500px] sm:min-h-[600px] lg:min-h-[650px]">
+      <div className="relative h-full">
         {slides.map((slide, index) => (
           <div
             key={index}
-            className={`transition-opacity duration-700 ease-in-out absolute inset-0 flex items-center ${
+            className={`transition-opacity duration-700 ease-in-out absolute inset-0 flex items-center overflow-hidden ${
               index === currentIndex ? 'opacity-100 relative z-10' : 'opacity-0 pointer-events-none'
             }`}
             aria-hidden={index !== currentIndex}
