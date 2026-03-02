@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiGet } from '@/lib/api';
-import { listNews } from '@/lib/firestore';
+import { listNews, listCarouselSlides } from '@/lib/firestore';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<{ pages: number; directors: number; services: number; news: number; messages: number; associates: number } | null>(null);
@@ -12,26 +12,26 @@ export default function AdminDashboardPage() {
     const token = localStorage.getItem('cdl_admin_token');
     if (!token) return;
 
-    // Notícias usam Firestore (não API) - mesma fonte que o CRUD em /admin/noticias
+    // Páginas (carrossel) e notícias usam Firestore
+    const pagesPromise = listCarouselSlides().then((items) => items.length).catch(() => 0);
     const newsPromise = listNews(false, 500).then((items) => items.length).catch(() => 0);
 
-    // API para páginas, diretoria, serviços, mensagens
+    // API para diretoria, serviços, mensagens
     const apiPromise = Promise.all([
-      apiGet<unknown[]>('/pages', token).catch(() => []),
       apiGet<unknown[]>('/directors', token).catch(() => []),
       apiGet<unknown[]>('/services', token).catch(() => []),
       apiGet<unknown[]>('/contact', token).catch(() => []),
-    ]).then(([pages, directors, services, messages]) => ({
-      pages: (pages as unknown[]).length,
+    ]).then(([directors, services, messages]) => ({
       directors: (directors as unknown[]).length,
       services: (services as unknown[]).length,
       messages: (messages as unknown[]).length,
     }));
 
-    Promise.all([apiPromise, newsPromise])
-      .then(([apiStats, newsCount]) => {
+    Promise.all([apiPromise, pagesPromise, newsPromise])
+      .then(([apiStats, pagesCount, newsCount]) => {
         setStats({
           ...apiStats,
+          pages: pagesCount,
           news: newsCount,
           associates: 200, // Valor estático baseado na estatística da homepage
         });

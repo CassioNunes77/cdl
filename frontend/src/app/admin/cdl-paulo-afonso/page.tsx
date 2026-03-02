@@ -1,59 +1,139 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiGet, apiPut, type About } from '@/lib/api';
+import Link from 'next/link';
+import { getAbout, setAbout, type AboutItem } from '@/lib/firestore';
+import { initFirebase } from '@/lib/firebase';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
-function getApiBase(): string {
-  if (typeof window === 'undefined') return '';
-  return process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-}
+const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY;
 
 export default function AdminCDLPauloAfonsoPage() {
-  const [about, setAbout] = useState<About>({ title: '', description: '', photo: null });
+  const [about, setAboutState] = useState<AboutItem>({ title: '', description: '', photo: null });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [imageError, setImageError] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('cdl_admin_token');
-    if (!token) return;
-    apiGet<About>('/about', token)
-      .then(setAbout)
-      .catch(() => {})
+    getAbout()
+      .then(setAboutState)
+      .catch(() => setAboutState({ title: '', description: '', photo: null }))
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleFileUpload(file: File) {
-    setUploading(true);
-    const token = localStorage.getItem('cdl_admin_token');
-    const formData = new FormData();
-    formData.append('file', file);
-
+  async function uploadImageFile(file?: File | null) {
+    if (!file) return;
+    setImageError('');
+    setImageUploading(true);
     try {
-      const res = await fetch(`${getApiBase()}/api/upload`, {
+      if (!IMGBB_KEY) {
+        setImageError('Chave de upload não configurada');
+        return;
+      }
+      async function compressImage(input: File, maxDim = 1600, quality = 0.75): Promise<Blob | null> {
+        try {
+          const bitmap = await createImageBitmap(input);
+          const { width, height } = bitmap;
+          let targetWidth = width;
+          let targetHeight = height;
+          if (width > maxDim || height > maxDim) {
+            const ratio = Math.min(maxDim / width, maxDim / height);
+            targetWidth = Math.round(width * ratio);
+            targetHeight = Math.round(height * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return null;
+          ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+          return await new Promise<Blob | null>((resolve) => {
+            canvas.toBlob((blob) => {
+              if (blob) return resolve(blob);
+              canvas.toBlob((blob2) => resolve(blob2), 'image/jpeg', quality);
+            }, 'image/webp', quality);
+          });
+        } catch {
+          return await new Promise<Blob | null>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              let w = img.width;
+              let h = img.height;
+              if (w > maxDim || h > maxDim) {
+                const r = Math.min(maxDim / w, maxDim / h);
+                w = Math.round(w * r);
+                h = Math.round(h * r);
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) return resolve(null);
+              ctx.drawImage(img, 0, 0, w, h);
+              canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+            };
+            img.onerror = () => resolve(null);
+            img.src = URL.createObjectURL(input);
+          });
+        }
+      }
+
+      const compressed = await compressImage(file, 1600, 0.75);
+      const toUpload = compressed && compressed.size > 0 ? compressed : file;
+      const form = new FormData();
+      if (toUpload instanceof Blob && !(toUpload instanceof File)) {
+        form.append('image', toUpload, file.name.replace(/\.[^/.]+$/, '') + '.jpg');
+      } else {
+        form.append('image', toUpload as File);
+      }
+
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+        body: form,
       });
-      if (!res.ok) throw new Error('Erro ao fazer upload');
       const data = await res.json();
-      setAbout((a) => ({ ...a, photo: data.url }));
-    } catch (err) {
-      alert('Erro ao fazer upload da imagem');
+      if (data?.data?.url) {
+        setAboutState((a) => ({ ...a, photo: data.data.url }));
+      } else {
+        setImageError('Erro ao enviar imagem');
+      }
+    } catch {
+      setImageError('Erro ao enviar imagem');
     } finally {
-      setUploading(false);
+      setImageUploading(false);
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError('');
     setSaving(true);
-    const token = localStorage.getItem('cdl_admin_token');
     try {
-      await apiPut('/about', about, token);
+      initFirebase();
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        setError('Você precisa estar logado como administrador');
+        return;
+      }
+      const idTokenResult = await user.getIdTokenResult();
+      const isClaimAdmin = !!(idTokenResult.claims && idTokenResult.claims.admin);
+      if (!isClaimAdmin) {
+        const db = getFirestore();
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        if (!adminDoc.exists()) {
+          setError('Acesso não autorizado');
+          return;
+        }
+      }
+
+      await setAbout(about);
       alert('Salvo com sucesso!');
     } catch (err) {
-      alert('Erro ao salvar');
+      setError(err instanceof Error ? err.message : 'Erro ao salvar');
     } finally {
       setSaving(false);
     }
@@ -67,37 +147,37 @@ export default function AdminCDLPauloAfonsoPage() {
       <p className="mt-2 text-sm text-cdl-gray-text">Edite as informações sobre a CDL Paulo Afonso</p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-6 max-w-3xl">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Foto</label>
-          {about.photo && (
-            <div className="mb-4">
-              <img
-                src={about.photo.startsWith('http') ? about.photo : `${getApiBase()}${about.photo}`}
-                alt="Preview"
-                className="max-w-md h-auto rounded-lg border border-gray-300"
-              />
-            </div>
-          )}
-          <div className="flex gap-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Foto destaque</label>
+          <div className="mt-1 flex items-center gap-3">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (file) handleFileUpload(file);
+                if (file) uploadImageFile(file);
               }}
-              disabled={uploading}
+              disabled={imageUploading}
               className="block text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-cdl-blue file:text-white hover:file:bg-cdl-blue-dark file:cursor-pointer"
             />
-            {uploading && <span className="text-sm text-cdl-gray-text">Enviando...</span>}
+            {imageUploading && <span className="text-sm text-cdl-gray-text">Enviando...</span>}
+            {imageError && <span className="text-sm text-red-600">{imageError}</span>}
           </div>
-          <p className="mt-2 text-xs text-cdl-gray-text">Ou cole uma URL de imagem:</p>
-          <input
-            type="text"
-            value={about.photo ?? ''}
-            onChange={(e) => setAbout((a) => ({ ...a, photo: e.target.value || null }))}
-            placeholder="https://exemplo.com/imagem.jpg"
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-          />
+          {about.photo && (
+            <div className="mt-4">
+              <img
+                src={about.photo}
+                alt="Preview"
+                className="max-w-md h-auto rounded-lg border border-gray-300"
+              />
+              <button
+                type="button"
+                onClick={() => setAboutState((a) => ({ ...a, photo: null }))}
+                className="mt-2 text-sm text-red-600 hover:underline"
+              >
+                Remover foto
+              </button>
+            </div>
+          )}
         </div>
 
         <div>
@@ -106,7 +186,7 @@ export default function AdminCDLPauloAfonsoPage() {
             type="text"
             required
             value={about.title}
-            onChange={(e) => setAbout((a) => ({ ...a, title: e.target.value }))}
+            onChange={(e) => setAboutState((a) => ({ ...a, title: e.target.value }))}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
             placeholder="CDL Paulo Afonso"
           />
@@ -117,13 +197,15 @@ export default function AdminCDLPauloAfonsoPage() {
           <textarea
             required
             value={about.description}
-            onChange={(e) => setAbout((a) => ({ ...a, description: e.target.value }))}
+            onChange={(e) => setAboutState((a) => ({ ...a, description: e.target.value }))}
             rows={8}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
             placeholder="Descrição sobre a CDL Paulo Afonso..."
           />
+          <p className="mt-1 text-xs text-cdl-gray-text">Use quebras de linha normalmente. O texto será exibido no site.</p>
         </div>
 
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" disabled={saving} className="btn-primary">
           {saving ? 'Salvando...' : 'Salvar'}
         </button>

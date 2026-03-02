@@ -27,6 +27,24 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Carousel / Hero slides: public read; admin write
+    match /carousel/{slideId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Auditório: public read; admin write
+    match /auditorium/{docId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // CDL Paulo Afonso (about page): public read; admin write
+    match /about/{docId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
     // Site settings: public read; admin write
     match /settings/{docId} {
       allow get, list: if true;

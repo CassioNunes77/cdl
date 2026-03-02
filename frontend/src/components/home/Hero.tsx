@@ -1,50 +1,37 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { HeroCarousel } from './HeroCarousel';
-import { getSettings } from '@/lib/firestore';
+import { HeroCarousel, type CarouselSlideData } from './HeroCarousel';
+import { listCarouselSlides } from '@/lib/firestore';
 
-const DEFAULT_TITLE = 'A CDL que faz sua empresa vender mais, gastar menos e crescer mais rápido';
-const DEFAULT_SUBTITLE = 'Comunidade empresarial de Paulo Afonso. Serviços, networking e apoio ao comércio local.';
-
-type HeroSlide = {
-  title: string;
-  subtitle: string;
-  primaryButton: { text: string; href: string };
-  secondaryButton: { text: string; href: string };
-};
-
-const INITIAL_SLIDES: HeroSlide[] = [
-    {
-      title: DEFAULT_TITLE,
-      subtitle: DEFAULT_SUBTITLE,
-      primaryButton: { text: 'Associe-se', href: '/associe-se' },
-      secondaryButton: { text: 'Conheça os serviços', href: '/servicos' },
-    },
-    {
-      title: 'Certificado Digital SPC',
-      subtitle: 'Transações virtuais, segurança real. Suas operações digitais muito mais seguras.',
-      primaryButton: { text: 'Saiba mais', href: '/servicos/certificado-digital' },
-      secondaryButton: { text: 'Associe-se', href: '/associe-se' },
-    },
+const DEFAULT_SLIDES: CarouselSlideData[] = [
+  {
+    title: 'A CDL que faz sua empresa vender mais, gastar menos e crescer mais rápido',
+    subtitle: 'Comunidade empresarial de Paulo Afonso. Serviços, networking e apoio ao comércio local.',
+    photo: null,
+    buttons: [
+      { text: 'Associe-se', href: '/associe-se' },
+      { text: 'Conheça os serviços', href: '/servicos' },
+    ],
+  },
 ];
 
 export function Hero() {
-  const [slides, setSlides] = useState<HeroSlide[]>(INITIAL_SLIDES);
+  const [slides, setSlides] = useState<CarouselSlideData[]>(DEFAULT_SLIDES);
 
   useEffect(() => {
-    getSettings()
-      .then((settings) => {
-        const title = settings.hero_title ?? DEFAULT_TITLE;
-        const subtitle = settings.hero_subtitle ?? DEFAULT_SUBTITLE;
-        setSlides((prev: HeroSlide[]) => [
-          {
-            ...prev[0],
-            title,
-            subtitle,
-          },
-          prev[1],
-        ]);
+    listCarouselSlides()
+      .then((items) => {
+        if (items.length > 0) {
+          setSlides(
+            items.map((s) => ({
+              title: s.title,
+              subtitle: s.description,
+              photo: s.photo,
+              buttons: s.buttons ?? [],
+            }))
+          );
+        }
       })
       .catch(() => {});
   }, []);

@@ -1,15 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import {
-  getCarouselSlide,
-  createCarouselSlide,
-  updateCarouselSlide,
-  listCarouselSlides,
-  type CarouselSlide,
-  type CarouselButton,
+  getAuditorium,
+  setAuditorium,
+  type AuditoriumItem,
 } from '@/lib/firestore';
 import { initFirebase } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
@@ -17,37 +12,26 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY;
 
-export default function AdminPaginaEditPage() {
-  const params = useParams();
-  const router = useRouter();
-  const id = params.id as string;
-  const isNew = id === 'nova';
-  const [slide, setSlide] = useState<Partial<CarouselSlide>>({
+export default function AdminAuditorioPage() {
+  const [data, setData] = useState<AuditoriumItem>({
     title: '',
     description: '',
     photo: null,
-    buttons: [],
-    order: 0,
+    infrastructureTitle: 'Infraestrutura',
+    infrastructureItems: [],
   });
-  const [loading, setLoading] = useState(!isNew);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [imageError, setImageError] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isNew) {
-      listCarouselSlides()
-        .then((list) => setSlide((s) => ({ ...s, order: list.length })))
-        .catch(() => {});
-      setLoading(false);
-      return;
-    }
-    getCarouselSlide(id)
-      .then((s) => s && setSlide(s))
+    getAuditorium()
+      .then(setData)
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id, isNew]);
+  }, []);
 
   async function uploadImageFile(file?: File | null) {
     if (!file) return;
@@ -119,9 +103,9 @@ export default function AdminPaginaEditPage() {
         method: 'POST',
         body: form,
       });
-      const data = await res.json();
-      if (data?.data?.url) {
-        setSlide((s) => ({ ...s, photo: data.data.url }));
+      const result = await res.json();
+      if (result?.data?.url) {
+        setData((d) => ({ ...d, photo: result.data.url }));
       } else {
         setImageError('Erro ao enviar imagem');
       }
@@ -155,22 +139,8 @@ export default function AdminPaginaEditPage() {
         }
       }
 
-      const buttons = (slide.buttons ?? []).filter((b) => b.text?.trim() && b.href?.trim());
-      const payload: Omit<CarouselSlide, 'id'> = {
-        title: slide.title!,
-        description: slide.description ?? '',
-        photo: slide.photo ?? null,
-        buttons,
-        order: slide.order ?? 0,
-      };
-
-      if (isNew) {
-        await createCarouselSlide(payload);
-        router.push('/admin/paginas');
-      } else {
-        await updateCarouselSlide(id, payload);
-        router.push('/admin/paginas');
-      }
+      await setAuditorium(data);
+      alert('Salvo com sucesso!');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar');
     } finally {
@@ -178,42 +148,29 @@ export default function AdminPaginaEditPage() {
     }
   }
 
-  const buttons = (slide.buttons ?? []) as CarouselButton[];
-
   if (loading) return <p className="text-cdl-gray-text">Carregando...</p>;
 
   return (
     <div>
-      <Link href="/admin/paginas" className="text-sm text-cdl-blue hover:underline mb-4 inline-block">← Páginas</Link>
-      <h1 className="text-2xl font-bold text-gray-900">{isNew ? 'Novo slide' : 'Editar slide'}</h1>
-      <p className="mt-1 text-sm text-cdl-gray-text">Slide do carrossel inicial do site</p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-6 max-w-2xl">
+      <h1 className="text-2xl font-bold text-gray-900">Auditório</h1>
+      <p className="mt-2 text-sm text-cdl-gray-text">
+        Edite o conteúdo da página do Auditório para Eventos
+      </p>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-6 max-w-3xl">
         <div>
           <label className="block text-sm font-medium text-gray-700">Título</label>
           <input
             type="text"
             required
-            value={slide.title ?? ''}
-            onChange={(e) => setSlide((s) => ({ ...s, title: e.target.value }))}
+            value={data.title}
+            onChange={(e) => setData((d) => ({ ...d, title: e.target.value }))}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-            placeholder="Ex: A CDL que faz sua empresa crescer"
+            placeholder="Auditório para Eventos"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Descrição</label>
-          <textarea
-            required
-            value={slide.description ?? ''}
-            onChange={(e) => setSlide((s) => ({ ...s, description: e.target.value }))}
-            rows={3}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-            placeholder="Texto exibido abaixo do título no carrossel"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Foto de fundo</label>
+          <label className="block text-sm font-medium text-gray-700">Foto de destaque</label>
           <div className="mt-1 flex items-center gap-3">
             <input
               type="file"
@@ -228,93 +185,88 @@ export default function AdminPaginaEditPage() {
             {imageUploading && <span className="text-sm text-cdl-gray-text">Enviando...</span>}
             {imageError && <span className="text-sm text-red-600">{imageError}</span>}
           </div>
-          {slide.photo && (
+          {data.photo && (
             <div className="mt-4">
-              <img src={slide.photo} alt="Preview" className="max-w-md h-auto rounded-lg border border-gray-300" />
+              <img src={data.photo} alt="Preview" className="max-w-md h-auto rounded-lg border border-gray-300" />
               <button
                 type="button"
-                onClick={() => setSlide((s) => ({ ...s, photo: null }))}
+                onClick={() => setData((d) => ({ ...d, photo: null }))}
                 className="mt-2 text-sm text-red-600 hover:underline"
               >
                 Remover foto
               </button>
             </div>
           )}
-          <p className="mt-1 text-xs text-cdl-gray-text">Opcional. Se não houver foto, o gradiente padrão será usado.</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Descrição</label>
+          <textarea
+            required
+            value={data.description}
+            onChange={(e) => setData((d) => ({ ...d, description: e.target.value }))}
+            rows={4}
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+            placeholder="Realize seus eventos com conforto e tecnologia..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Título da seção Infraestrutura</label>
+          <input
+            type="text"
+            value={data.infrastructureTitle}
+            onChange={(e) => setData((d) => ({ ...d, infrastructureTitle: e.target.value }))}
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+            placeholder="Infraestrutura"
+          />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">Botões</label>
+            <label className="block text-sm font-medium text-gray-700">Itens da infraestrutura</label>
             <button
               type="button"
-              onClick={() => setSlide((s) => ({ ...s, buttons: [...buttons, { text: '', href: '' }] }))}
+              onClick={() => setData((d) => ({ ...d, infrastructureItems: [...d.infrastructureItems, ''] }))}
               className="text-sm text-cdl-blue hover:underline font-medium"
             >
-              + Adicionar botão
+              + Adicionar item
             </button>
           </div>
-          <p className="text-xs text-cdl-gray-text mb-3">Nome = texto do botão. Link = destino ao clicar.</p>
-          <div className="space-y-3">
-            {buttons.map((btn, index) => (
-              <div key={index} className="p-4 border border-gray-200 rounded-lg bg-gray-50 flex gap-3 items-start">
-                <div className="flex-1 grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Nome do botão</label>
-                    <input
-                      type="text"
-                      value={btn.text}
-                      onChange={(e) => {
-                        const updated = [...buttons];
-                        updated[index] = { ...updated[index], text: e.target.value };
-                        setSlide((s) => ({ ...s, buttons: updated }));
-                      }}
-                      placeholder="Ex: Associe-se"
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Link</label>
-                    <input
-                      type="text"
-                      value={btn.href}
-                      onChange={(e) => {
-                        const updated = [...buttons];
-                        updated[index] = { ...updated[index], href: e.target.value };
-                        setSlide((s) => ({ ...s, buttons: updated }));
-                      }}
-                      placeholder="/associe-se ou https://..."
-                      className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                </div>
+          <div className="space-y-2">
+            {data.infrastructureItems.map((item, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="text"
+                  value={item}
+                  onChange={(e) => {
+                    const updated = [...data.infrastructureItems];
+                    updated[index] = e.target.value;
+                    setData((d) => ({ ...d, infrastructureItems: updated }));
+                  }}
+                  placeholder="Ex: Sistema de som e iluminação profissional"
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
+                />
                 <button
                   type="button"
-                  onClick={() => setSlide((s) => ({ ...s, buttons: buttons.filter((_, i) => i !== index) }))}
-                  className="text-sm text-red-600 hover:underline mt-6"
+                  onClick={() =>
+                    setData((d) => ({
+                      ...d,
+                      infrastructureItems: d.infrastructureItems.filter((_, i) => i !== index),
+                    }))
+                  }
+                  className="text-sm text-red-600 hover:underline px-2"
                 >
                   Remover
                 </button>
               </div>
             ))}
-            {buttons.length === 0 && (
+            {data.infrastructureItems.length === 0 && (
               <p className="text-sm text-cdl-gray-text italic py-4 text-center border border-dashed border-gray-300 rounded-lg">
-                Nenhum botão. Clique em &quot;Adicionar botão&quot; para criar.
+                Nenhum item. Clique em &quot;Adicionar item&quot; para incluir.
               </p>
             )}
           </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Ordem</label>
-          <input
-            type="number"
-            min={0}
-            value={slide.order ?? 0}
-            onChange={(e) => setSlide((s) => ({ ...s, order: parseInt(e.target.value, 10) || 0 }))}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 max-w-[120px]"
-          />
-          <p className="mt-1 text-xs text-cdl-gray-text">Menor número aparece primeiro.</p>
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}

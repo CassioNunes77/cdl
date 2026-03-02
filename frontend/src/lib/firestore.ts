@@ -209,6 +209,164 @@ export async function deleteNews(id: string): Promise<void> {
   await deleteDoc(ref);
 }
 
+// ---- Carousel / Hero slides (Firestore) ----
+export type CarouselButton = { text: string; href: string };
+
+export type CarouselSlide = {
+  id?: string;
+  title: string;
+  description: string;
+  photo: string | null;
+  buttons: CarouselButton[];
+  order: number;
+};
+
+export async function listCarouselSlides(): Promise<CarouselSlide[]> {
+  const db = getDb();
+  const col = collection(db, 'carousel');
+  const q = query(col, orderBy('order', 'asc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      title: data.title ?? '',
+      description: data.description ?? '',
+      photo: data.photo ?? null,
+      buttons: Array.isArray(data.buttons) ? data.buttons : [],
+      order: data.order ?? 0,
+    };
+  });
+}
+
+export async function getCarouselSlide(id: string): Promise<CarouselSlide | null> {
+  const db = getDb();
+  const ref = doc(db, 'carousel', id);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  return {
+    id: snap.id,
+    title: data?.title ?? '',
+    description: data?.description ?? '',
+    photo: data?.photo ?? null,
+    buttons: Array.isArray(data?.buttons) ? data.buttons : [],
+    order: data?.order ?? 0,
+  };
+}
+
+export async function createCarouselSlide(data: Omit<CarouselSlide, 'id'>): Promise<string> {
+  const db = getDb();
+  const col = collection(db, 'carousel');
+  const payload = {
+    title: data.title,
+    description: data.description,
+    photo: data.photo ?? null,
+    buttons: data.buttons ?? [],
+    order: data.order ?? 0,
+  };
+  const ref = await addDoc(col, payload);
+  return ref.id;
+}
+
+export async function updateCarouselSlide(id: string, data: Partial<CarouselSlide>): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, 'carousel', id);
+  const payload: Record<string, unknown> = {};
+  if (data.title !== undefined) payload.title = data.title;
+  if (data.description !== undefined) payload.description = data.description;
+  if (data.photo !== undefined) payload.photo = data.photo;
+  if (data.buttons !== undefined) payload.buttons = data.buttons;
+  if (data.order !== undefined) payload.order = data.order;
+  await updateDoc(ref, payload);
+}
+
+export async function deleteCarouselSlide(id: string): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, 'carousel', id);
+  await deleteDoc(ref);
+}
+
+// ---- Auditorium (Firestore: single doc) ----
+const AUDITORIUM_DOC_ID = 'page';
+
+export type AuditoriumItem = {
+  title: string;
+  description: string;
+  photo: string | null;
+  infrastructureTitle: string;
+  infrastructureItems: string[];
+};
+
+export async function getAuditorium(): Promise<AuditoriumItem> {
+  const db = getDb();
+  const ref = doc(db, 'auditorium', AUDITORIUM_DOC_ID);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    return {
+      title: '',
+      description: '',
+      photo: null,
+      infrastructureTitle: '',
+      infrastructureItems: [],
+    };
+  }
+  const data = snap.data();
+  return {
+    title: data?.title ?? '',
+    description: data?.description ?? '',
+    photo: data?.photo ?? null,
+    infrastructureTitle: data?.infrastructureTitle ?? 'Infraestrutura',
+    infrastructureItems: Array.isArray(data?.infrastructureItems) ? data.infrastructureItems : [],
+  };
+}
+
+export async function setAuditorium(data: AuditoriumItem): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, 'auditorium', AUDITORIUM_DOC_ID);
+  await setDoc(ref, {
+    title: data.title,
+    description: data.description,
+    photo: data.photo ?? null,
+    infrastructureTitle: data.infrastructureTitle,
+    infrastructureItems: data.infrastructureItems ?? [],
+  });
+}
+
+// ---- About / CDL Paulo Afonso (Firestore: single doc) ----
+const ABOUT_DOC_ID = 'cdl';
+
+export type AboutItem = {
+  title: string;
+  description: string;
+  photo: string | null;
+};
+
+export async function getAbout(): Promise<AboutItem> {
+  const db = getDb();
+  const ref = doc(db, 'about', ABOUT_DOC_ID);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    return { title: '', description: '', photo: null };
+  }
+  const data = snap.data();
+  return {
+    title: data?.title ?? '',
+    description: data?.description ?? '',
+    photo: data?.photo ?? null,
+  };
+}
+
+export async function setAbout(data: AboutItem): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, 'about', ABOUT_DOC_ID);
+  await setDoc(ref, {
+    title: data.title,
+    description: data.description,
+    photo: data.photo ?? null,
+  });
+}
+
 // ---- Settings (Firestore: single doc settings/site) ----
 const SETTINGS_DOC_ID = 'site';
 

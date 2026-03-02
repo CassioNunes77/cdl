@@ -8,10 +8,16 @@ import Image from 'next/image';
 const adminNav = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/associados', label: 'Associados' },
-  { href: '/admin/paginas', label: 'Páginas' },
+  { href: '/admin/paginas', label: 'Páginas (Carrossel)' },
   { href: '/admin/cdl-paulo-afonso', label: 'CDL Paulo Afonso' },
   { href: '/admin/diretoria', label: 'Diretoria' },
-  { href: '/admin/servicos', label: 'Soluções para empresas' },
+  {
+    label: 'Soluções para Empresas',
+    children: [
+      { href: '/admin/auditorio', label: 'Auditório' },
+      { href: '/admin/servicos', label: 'Serviços' },
+    ],
+  },
   { href: '/admin/noticias', label: 'Notícias' },
   { href: '/admin/campanhas', label: 'Campanhas' },
   { href: '/admin/contato', label: 'Mensagens' },
@@ -59,17 +65,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-          {adminNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                pathname === item.href ? 'bg-cdl-blue text-white' : 'text-gray-700 hover:bg-cdl-gray'
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {adminNav.map((item) =>
+            'children' in item ? (
+              <div key={item.label} className="mb-1">
+                <p className="px-3 py-1.5 text-xs font-semibold text-cdl-gray-text uppercase tracking-wider">
+                  {item.label}
+                </p>
+                {item.children.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ml-1 ${
+                      pathname === child.href ? 'bg-cdl-blue text-white' : 'text-gray-700 hover:bg-cdl-gray'
+                    }`}
+                  >
+                    {child.label}
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  pathname === item.href ? 'bg-cdl-blue text-white' : 'text-gray-700 hover:bg-cdl-gray'
+                }`}
+              >
+                {item.label}
+              </Link>
+            )
+          )}
         </nav>
         <div className="p-3 border-t border-gray-200">
           <Link href="/" className="block px-3 py-2 text-sm text-cdl-gray-text hover:text-cdl-blue">
