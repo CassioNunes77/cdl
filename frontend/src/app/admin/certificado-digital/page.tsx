@@ -12,73 +12,23 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY;
 
-function ItemListEditor({
-  items,
-  onChange,
-  placeholder,
-  emptyMessage,
-}: {
-  items: string[];
-  onChange: (items: string[]) => void;
-  placeholder: string;
-  emptyMessage: string;
-}) {
-  return (
-    <div className="space-y-2">
-      {items.map((item, index) => (
-        <div key={index} className="flex gap-2">
-          <input
-            type="text"
-            value={item}
-            onChange={(e) => {
-              const updated = [...items];
-              updated[index] = e.target.value;
-              onChange(updated);
-            }}
-            placeholder={placeholder}
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
-          />
-          <button
-            type="button"
-            onClick={() => onChange(items.filter((_, i) => i !== index))}
-            className="text-sm text-red-600 hover:underline px-2"
-          >
-            Remover
-          </button>
-        </div>
-      ))}
-      {items.length === 0 && (
-        <p className="text-sm text-cdl-gray-text italic py-4 text-center border border-dashed border-gray-300 rounded-lg">
-          {emptyMessage}
-        </p>
-      )}
-      <button
-        type="button"
-        onClick={() => onChange([...items, ''])}
-        className="text-sm text-cdl-blue hover:underline font-medium"
-      >
-        + Adicionar item
-      </button>
-    </div>
-  );
-}
+const SECTION_LABELS = [
+  { title: 'Seção 1', titlePlaceholder: 'Ex: Como funciona', contentPlaceholder: 'Texto livre. Use quebras de linha. O usuário adiciona todo o conteúdo aqui.' },
+  { title: 'Seção 2', titlePlaceholder: 'Ex: Benefício para Associados', contentPlaceholder: 'Texto livre da seção.' },
+  { title: 'Seção 3', titlePlaceholder: 'Ex: Documentos necessários', contentPlaceholder: 'Texto livre da seção.' },
+];
 
 export default function AdminCertificadoDigitalPage() {
   const [data, setData] = useState<CertificadoDigitalItem>({
     title: '',
     description: '',
     photo: null,
-    howItWorksTitle: '',
-    howItWorksIntro: '',
-    howItWorksItems: [],
-    benefitTitle: '',
-    benefitDescription: '',
-    docsTitle: '',
-    docsPfTitle: '',
-    docsPfItems: [],
-    docsPjTitle: '',
-    docsPjItems: [],
-    docsPjNote: '',
+    section1Title: '',
+    section1Content: '',
+    section2Title: '',
+    section2Content: '',
+    section3Title: '',
+    section3Content: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -214,7 +164,7 @@ export default function AdminCertificadoDigitalPage() {
     <div>
       <h1 className="text-2xl font-bold text-gray-900">Certificado Digital</h1>
       <p className="mt-2 text-sm text-cdl-gray-text">
-        Edite o conteúdo da página do Certificado Digital
+        Edite o conteúdo da página. Cada seção tem título e texto livre.
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-8 max-w-3xl">
         <div>
@@ -271,130 +221,39 @@ export default function AdminCertificadoDigitalPage() {
           />
         </div>
 
-        <div className="p-4 bg-cdl-gray rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Seção: Como funciona</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Título</label>
-              <input
-                type="text"
-                value={data.howItWorksTitle}
-                onChange={(e) => setData((d) => ({ ...d, howItWorksTitle: e.target.value }))}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="Como funciona"
-              />
+        {SECTION_LABELS.map((label, i) => {
+          const sectionNum = i + 1;
+          const titleKey = `section${sectionNum}Title` as keyof CertificadoDigitalItem;
+          const contentKey = `section${sectionNum}Content` as keyof CertificadoDigitalItem;
+          return (
+            <div key={i} className="p-4 bg-cdl-gray rounded-xl border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{label.title}</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Título da seção</label>
+                  <input
+                    type="text"
+                    value={data[titleKey] as string}
+                    onChange={(e) => setData((d) => ({ ...d, [titleKey]: e.target.value }))}
+                    className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+                    placeholder={label.titlePlaceholder}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Conteúdo (texto livre)</label>
+                  <textarea
+                    value={data[contentKey] as string}
+                    onChange={(e) => setData((d) => ({ ...d, [contentKey]: e.target.value }))}
+                    rows={6}
+                    className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+                    placeholder={label.contentPlaceholder}
+                  />
+                  <p className="mt-1 text-xs text-cdl-gray-text">Quebras de linha serão preservadas.</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Texto introdutório</label>
-              <textarea
-                value={data.howItWorksIntro}
-                onChange={(e) => setData((d) => ({ ...d, howItWorksIntro: e.target.value }))}
-                rows={2}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="Você pode realizar o processo de forma rápida..."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Itens (ex: Online com CNH, Presencialmente)</label>
-              <ItemListEditor
-                items={data.howItWorksItems}
-                onChange={(items) => setData((d) => ({ ...d, howItWorksItems: items }))}
-                placeholder="Ex: Online com CNH: Faça tudo pela internet..."
-                emptyMessage="Nenhum item. Clique em Adicionar item."
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 bg-cdl-gray rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Seção: Benefício para Associados</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Título</label>
-              <input
-                type="text"
-                value={data.benefitTitle}
-                onChange={(e) => setData((d) => ({ ...d, benefitTitle: e.target.value }))}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="Benefício para Associados"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Descrição</label>
-              <textarea
-                value={data.benefitDescription}
-                onChange={(e) => setData((d) => ({ ...d, benefitDescription: e.target.value }))}
-                rows={3}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="Associados da CDL têm valor reduzido..."
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 bg-cdl-gray rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Seção: Documentos necessários</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Título principal</label>
-              <input
-                type="text"
-                value={data.docsTitle}
-                onChange={(e) => setData((d) => ({ ...d, docsTitle: e.target.value }))}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="Documentos necessários"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Pessoa Física - Título</label>
-              <input
-                type="text"
-                value={data.docsPfTitle}
-                onChange={(e) => setData((d) => ({ ...d, docsPfTitle: e.target.value }))}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="Pessoa Física"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Pessoa Física - Itens</label>
-              <ItemListEditor
-                items={data.docsPfItems}
-                onChange={(items) => setData((d) => ({ ...d, docsPfItems: items }))}
-                placeholder="Ex: Carteira Nacional de Habilitação (CNH)"
-                emptyMessage="Nenhum item."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Pessoa Jurídica - Título</label>
-              <input
-                type="text"
-                value={data.docsPjTitle}
-                onChange={(e) => setData((d) => ({ ...d, docsPjTitle: e.target.value }))}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="Pessoa Jurídica (PJ)"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Pessoa Jurídica - Itens</label>
-              <ItemListEditor
-                items={data.docsPjItems}
-                onChange={(items) => setData((d) => ({ ...d, docsPjItems: items }))}
-                placeholder="Ex: CNH do responsável"
-                emptyMessage="Nenhum item."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Nota (PJ)</label>
-              <input
-                type="text"
-                value={data.docsPjNote}
-                onChange={(e) => setData((d) => ({ ...d, docsPjNote: e.target.value }))}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="No caso de MEI, apresentar apenas o comprovante do MEI."
-              />
-            </div>
-          </div>
-        </div>
+          );
+        })}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" disabled={saving} className="btn-primary">

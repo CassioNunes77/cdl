@@ -294,17 +294,12 @@ export type CertificadoDigitalItem = {
   title: string;
   description: string;
   photo: string | null;
-  howItWorksTitle: string;
-  howItWorksIntro: string;
-  howItWorksItems: string[];
-  benefitTitle: string;
-  benefitDescription: string;
-  docsTitle: string;
-  docsPfTitle: string;
-  docsPfItems: string[];
-  docsPjTitle: string;
-  docsPjItems: string[];
-  docsPjNote: string;
+  section1Title: string;
+  section1Content: string;
+  section2Title: string;
+  section2Content: string;
+  section3Title: string;
+  section3Content: string;
 };
 
 export async function getCertificadoDigital(): Promise<CertificadoDigitalItem> {
@@ -316,17 +311,12 @@ export async function getCertificadoDigital(): Promise<CertificadoDigitalItem> {
       title: '',
       description: '',
       photo: null,
-      howItWorksTitle: '',
-      howItWorksIntro: '',
-      howItWorksItems: [],
-      benefitTitle: '',
-      benefitDescription: '',
-      docsTitle: '',
-      docsPfTitle: '',
-      docsPfItems: [],
-      docsPjTitle: '',
-      docsPjItems: [],
-      docsPjNote: '',
+      section1Title: '',
+      section1Content: '',
+      section2Title: '',
+      section2Content: '',
+      section3Title: '',
+      section3Content: '',
     };
   }
   const data = snap.data();
@@ -334,17 +324,12 @@ export async function getCertificadoDigital(): Promise<CertificadoDigitalItem> {
     title: data?.title ?? '',
     description: data?.description ?? '',
     photo: data?.photo ?? null,
-    howItWorksTitle: data?.howItWorksTitle ?? '',
-    howItWorksIntro: data?.howItWorksIntro ?? '',
-    howItWorksItems: Array.isArray(data?.howItWorksItems) ? data.howItWorksItems : [],
-    benefitTitle: data?.benefitTitle ?? '',
-    benefitDescription: data?.benefitDescription ?? '',
-    docsTitle: data?.docsTitle ?? '',
-    docsPfTitle: data?.docsPfTitle ?? '',
-    docsPfItems: Array.isArray(data?.docsPfItems) ? data.docsPfItems : [],
-    docsPjTitle: data?.docsPjTitle ?? '',
-    docsPjItems: Array.isArray(data?.docsPjItems) ? data.docsPjItems : [],
-    docsPjNote: data?.docsPjNote ?? '',
+    section1Title: data?.section1Title ?? '',
+    section1Content: data?.section1Content ?? '',
+    section2Title: data?.section2Title ?? '',
+    section2Content: data?.section2Content ?? '',
+    section3Title: data?.section3Title ?? '',
+    section3Content: data?.section3Content ?? '',
   };
 }
 
@@ -355,17 +340,12 @@ export async function setCertificadoDigital(data: CertificadoDigitalItem): Promi
     title: data.title,
     description: data.description,
     photo: data.photo ?? null,
-    howItWorksTitle: data.howItWorksTitle,
-    howItWorksIntro: data.howItWorksIntro,
-    howItWorksItems: data.howItWorksItems ?? [],
-    benefitTitle: data.benefitTitle,
-    benefitDescription: data.benefitDescription,
-    docsTitle: data.docsTitle,
-    docsPfTitle: data.docsPfTitle,
-    docsPfItems: data.docsPfItems ?? [],
-    docsPjTitle: data.docsPjTitle,
-    docsPjItems: data.docsPjItems ?? [],
-    docsPjNote: data.docsPjNote ?? '',
+    section1Title: data.section1Title,
+    section1Content: data.section1Content,
+    section2Title: data.section2Title,
+    section2Content: data.section2Content,
+    section3Title: data.section3Title,
+    section3Content: data.section3Content,
   });
 }
 
