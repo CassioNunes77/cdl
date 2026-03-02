@@ -214,6 +214,9 @@ export default function AdminPaginaEditPage() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Foto de fundo</label>
+          <p className="mt-1 text-xs text-cdl-gray-text mb-2">
+            Sugestão: 1920×650 px (proporção ~3:1). A imagem será recortada para caber no carrossel.
+          </p>
           <div className="mt-1 flex items-center gap-3">
             <input
               type="file"
