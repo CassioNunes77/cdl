@@ -71,7 +71,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="px-3 py-1.5 text-xs font-semibold text-cdl-gray-text uppercase tracking-wider">
                   {item.label}
                 </p>
-                {item.children.map((child) => (
+                {(item.children ?? []).map((child) => (
                   <Link
                     key={child.href}
                     href={child.href}
