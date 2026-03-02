@@ -11,13 +11,14 @@ const adminNav = [
   { href: '/admin/paginas', label: 'Páginas (Carrossel)' },
   { href: '/admin/cdl-paulo-afonso', label: 'CDL Paulo Afonso' },
   { href: '/admin/diretoria', label: 'Diretoria' },
-  {
-    label: 'Soluções para Empresas',
-    children: [
-      { href: '/admin/auditorio', label: 'Auditório' },
-      { href: '/admin/servicos', label: 'Serviços' },
-    ],
-  },
+    {
+      label: 'Soluções para Empresas',
+      children: [
+        { href: '/admin/auditorio', label: 'Auditório' },
+        { href: '/admin/certificado-digital', label: 'Certificado Digital' },
+        { href: '/admin/servicos', label: 'Serviços' },
+      ],
+    },
   { href: '/admin/noticias', label: 'Notícias' },
   { href: '/admin/campanhas', label: 'Campanhas' },
   { href: '/admin/contato', label: 'Mensagens' },

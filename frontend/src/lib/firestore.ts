@@ -287,6 +287,88 @@ export async function deleteCarouselSlide(id: string): Promise<void> {
   await deleteDoc(ref);
 }
 
+// ---- Certificado Digital (Firestore: single doc) ----
+const CERTIFICADO_DOC_ID = 'page';
+
+export type CertificadoDigitalItem = {
+  title: string;
+  description: string;
+  photo: string | null;
+  howItWorksTitle: string;
+  howItWorksIntro: string;
+  howItWorksItems: string[];
+  benefitTitle: string;
+  benefitDescription: string;
+  docsTitle: string;
+  docsPfTitle: string;
+  docsPfItems: string[];
+  docsPjTitle: string;
+  docsPjItems: string[];
+  docsPjNote: string;
+};
+
+export async function getCertificadoDigital(): Promise<CertificadoDigitalItem> {
+  const db = getDb();
+  const ref = doc(db, 'certificadoDigital', CERTIFICADO_DOC_ID);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    return {
+      title: '',
+      description: '',
+      photo: null,
+      howItWorksTitle: '',
+      howItWorksIntro: '',
+      howItWorksItems: [],
+      benefitTitle: '',
+      benefitDescription: '',
+      docsTitle: '',
+      docsPfTitle: '',
+      docsPfItems: [],
+      docsPjTitle: '',
+      docsPjItems: [],
+      docsPjNote: '',
+    };
+  }
+  const data = snap.data();
+  return {
+    title: data?.title ?? '',
+    description: data?.description ?? '',
+    photo: data?.photo ?? null,
+    howItWorksTitle: data?.howItWorksTitle ?? '',
+    howItWorksIntro: data?.howItWorksIntro ?? '',
+    howItWorksItems: Array.isArray(data?.howItWorksItems) ? data.howItWorksItems : [],
+    benefitTitle: data?.benefitTitle ?? '',
+    benefitDescription: data?.benefitDescription ?? '',
+    docsTitle: data?.docsTitle ?? '',
+    docsPfTitle: data?.docsPfTitle ?? '',
+    docsPfItems: Array.isArray(data?.docsPfItems) ? data.docsPfItems : [],
+    docsPjTitle: data?.docsPjTitle ?? '',
+    docsPjItems: Array.isArray(data?.docsPjItems) ? data.docsPjItems : [],
+    docsPjNote: data?.docsPjNote ?? '',
+  };
+}
+
+export async function setCertificadoDigital(data: CertificadoDigitalItem): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, 'certificadoDigital', CERTIFICADO_DOC_ID);
+  await setDoc(ref, {
+    title: data.title,
+    description: data.description,
+    photo: data.photo ?? null,
+    howItWorksTitle: data.howItWorksTitle,
+    howItWorksIntro: data.howItWorksIntro,
+    howItWorksItems: data.howItWorksItems ?? [],
+    benefitTitle: data.benefitTitle,
+    benefitDescription: data.benefitDescription,
+    docsTitle: data.docsTitle,
+    docsPfTitle: data.docsPfTitle,
+    docsPfItems: data.docsPfItems ?? [],
+    docsPjTitle: data.docsPjTitle,
+    docsPjItems: data.docsPjItems ?? [],
+    docsPjNote: data.docsPjNote ?? '',
+  });
+}
+
 // ---- Auditorium (Firestore: single doc) ----
 const AUDITORIUM_DOC_ID = 'page';
 

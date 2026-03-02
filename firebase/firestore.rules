@@ -33,6 +33,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Certificado Digital: public read; admin write
+    match /certificadoDigital/{docId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
     // Auditório: public read; admin write
     match /auditorium/{docId} {
       allow get, list: if true;

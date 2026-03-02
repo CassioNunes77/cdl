@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { getAuditorium } from '@/lib/firestore';
 import { WhatsAppContactButton } from './WhatsAppContactButton';
@@ -41,10 +40,6 @@ export default function AuditorioPage() {
   return (
     <div className="py-12 sm:py-16">
       <div className="container-cdl max-w-4xl">
-        <Link href="/servicos" className="text-sm text-cdl-blue hover:underline mb-6 inline-block">
-          ← Voltar aos serviços
-        </Link>
-
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
           {title}
         </h1>
