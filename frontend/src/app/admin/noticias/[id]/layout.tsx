@@ -1,5 +1,13 @@
+import { listNewsIdsAtBuild } from '@/lib/firestore-build';
+
 export async function generateStaticParams() {
-  return [{ id: 'nova' }];
+  try {
+    const ids = await listNewsIdsAtBuild();
+    const params = [{ id: 'nova' as string }, ...ids.map((id) => ({ id }))];
+    return params;
+  } catch {
+    return [{ id: 'nova' }];
+  }
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
