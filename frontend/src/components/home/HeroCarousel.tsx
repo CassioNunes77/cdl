@@ -59,7 +59,7 @@ export function HeroCarousel({ slides, autoSlideInterval = 5000 }: HeroCarouselP
             aria-hidden={index !== currentIndex}
           >
             {/* Background: foto ou gradiente */}
-            <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 -z-10 h-full">
               {slide.photo ? (
                 <>
                   <Image
@@ -70,10 +70,10 @@ export function HeroCarousel({ slides, autoSlideInterval = 5000 }: HeroCarouselP
                     sizes="100vw"
                     unoptimized={slide.photo.startsWith('http')}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-br from-cdl-blue/90 via-cdl-blue-dark/85 to-cdl-blue/90" />
+                  <div className="absolute inset-0 h-full bg-gradient-to-br from-cdl-blue/90 via-cdl-blue-dark/85 to-cdl-blue/90" />
                 </>
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-cdl-blue via-cdl-blue-dark to-cdl-blue" />
+                <div className="absolute inset-0 h-full bg-gradient-to-br from-cdl-blue via-cdl-blue-dark to-cdl-blue" />
               )}
             </div>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.08)_0%,_transparent_50%)]" aria-hidden="true" />
