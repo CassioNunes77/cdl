@@ -349,6 +349,39 @@ export async function setCertificadoDigital(data: CertificadoDigitalItem): Promi
   });
 }
 
+// ---- Benefícios Associados (Firestore: single doc) ----
+const BENEFICIOS_DOC_ID = 'page';
+
+export type BeneficiosAssociadosItem = {
+  title: string;
+  description: string;
+  photo: string | null;
+};
+
+export async function getBeneficiosAssociados(): Promise<BeneficiosAssociadosItem> {
+  const db = getDb();
+  const ref = doc(db, 'beneficiosAssociados', BENEFICIOS_DOC_ID);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    return {
+      title: '',
+      description: '',
+      photo: null,
+    };
+  }
+  return snap.data() as BeneficiosAssociadosItem;
+}
+
+export async function setBeneficiosAssociados(data: BeneficiosAssociadosItem): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, 'beneficiosAssociados', BENEFICIOS_DOC_ID);
+  await setDoc(ref, {
+    title: data.title,
+    description: data.description,
+    photo: data.photo ?? null,
+  });
+}
+
 // ---- Auditorium (Firestore: single doc) ----
 const AUDITORIUM_DOC_ID = 'page';
 

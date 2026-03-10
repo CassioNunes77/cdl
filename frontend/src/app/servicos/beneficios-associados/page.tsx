@@ -1,6 +1,8 @@
-import Link from 'next/link';
+'use client';
 
-export const dynamic = 'force-static';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { getBeneficiosAssociados, type BeneficiosAssociadosItem } from '@/lib/firestore';
 
 const partners = [
   { name: 'Unirios', description: 'Convênio especial para associados' },
@@ -18,38 +20,77 @@ const partners = [
 ];
 
 export default function BeneficiosAssociadosPage() {
+  const [data, setData] = useState<BeneficiosAssociadosItem | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getBeneficiosAssociados()
+      .then(setData)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="py-12 sm:py-16">
+        <div className="container-cdl max-w-5xl">
+          <div className="text-center">Carregando...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="py-12 sm:py-16">
       <div className="container-cdl max-w-5xl">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-8">
-          Benefícios para Associados
+          {data?.title || 'Benefícios para Associados'}
         </h1>
 
         <div className="mb-8 rounded-xl overflow-hidden shadow-lg">
-          <div className="relative w-full h-64 sm:h-96 bg-gradient-to-br from-cdl-blue via-cdl-blue-dark to-cdl-blue">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg className="w-32 h-32 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <p className="absolute bottom-4 left-4 right-4 text-white/80 text-sm text-center">
-              Imagem será adicionada aqui
-            </p>
+          <div className="relative w-full h-64 sm:h-96">
+            {data?.photo ? (
+              <img
+                src={data.photo}
+                alt="Benefícios para Associados"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-cdl-blue via-cdl-blue-dark to-cdl-blue">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg className="w-32 h-32 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="prose prose-cdl max-w-none">
-          {/* Seção: Novo Programa de Benefícios */}
-          <div className="mb-10 p-6 bg-gradient-to-r from-cdl-blue/10 to-cdl-blue-dark/10 rounded-xl border-2 border-cdl-blue/30">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Novo Programa de Benefícios para Associados</h2>
-            <p className="text-cdl-gray-text leading-relaxed mb-4">
-              A CDL Paulo Afonso estabeleceu parcerias estratégicas com empresas locais para oferecer condições especiais aos nossos associados. 
-              Através desses convênios, você tem acesso a descontos e benefícios exclusivos em diversos segmentos, fortalecendo ainda mais o seu negócio e proporcionando economia para sua empresa.
-            </p>
-            <p className="text-sm text-cdl-gray-text italic">
-              Para conhecer as condições específicas de cada convênio, entre em contato diretamente com nossos parceiros ou através da CDL.
-            </p>
-          </div>
+          {data?.description && (
+            <div className="mb-10 p-6 bg-gradient-to-r from-cdl-blue/10 to-cdl-blue-dark/10 rounded-xl border-2 border-cdl-blue/30">
+              <div className="text-cdl-gray-text leading-relaxed whitespace-pre-line">
+                {data.description}
+              </div>
+            </div>
+          )}
+
+          {!data?.description && (
+            <>
+              {/* Seção: Novo Programa de Benefícios */}
+              <div className="mb-10 p-6 bg-gradient-to-r from-cdl-blue/10 to-cdl-blue-dark/10 rounded-xl border-2 border-cdl-blue/30">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Novo Programa de Benefícios para Associados</h2>
+                <p className="text-cdl-gray-text leading-relaxed mb-4">
+                  A CDL Paulo Afonso estabeleceu parcerias estratégicas com empresas locais para oferecer condições especiais aos nossos associados. 
+                  Através desses convênios, você tem acesso a descontos e benefícios exclusivos em diversos segmentos, fortalecendo ainda mais o seu negócio e proporcionando economia para sua empresa.
+                </p>
+                <p className="text-sm text-cdl-gray-text italic">
+                  Para conhecer as condições específicas de cada convênio, entre em contato diretamente com nossos parceiros ou através da CDL.
+                </p>
+              </div>
+            </>
+          )}
 
           {/* Informações Principais */}
           <div className="mb-10 grid grid-cols-1 md:grid-cols-3 gap-6">

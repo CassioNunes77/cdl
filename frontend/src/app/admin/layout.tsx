@@ -16,6 +16,7 @@ const adminNav = [
       children: [
         { href: '/admin/auditorio', label: 'Auditório' },
         { href: '/admin/certificado-digital', label: 'Certificado Digital' },
+        { href: '/admin/beneficios-associados', label: 'Benefícios para Associados' },
         { href: '/admin/servicos', label: 'Serviços' },
       ],
     },
