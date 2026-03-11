@@ -70,6 +70,11 @@ export default function AgendamentosPage() {
     setFormData({ ...formData, telefone: formatted });
   };
 
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const startDate = e.target.value;
+    setFormData({ ...formData, start: startDate, end: startDate });
+  };
+
   const handleEdit = (agendamento: Agendamento) => {
     setSelectedAgendamento(agendamento);
     
@@ -317,7 +322,7 @@ export default function AgendamentosPage() {
                   <input
                     type="datetime-local"
                     value={formData.start}
-                    onChange={(e) => setFormData({ ...formData, start: e.target.value })}
+                    onChange={handleStartDateChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cdl-blue focus:border-cdl-blue"
                     required
                   />
