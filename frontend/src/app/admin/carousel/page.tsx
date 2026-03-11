@@ -117,14 +117,14 @@ export default function CarouselPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('key', process.env.NEXT_PUBLIC_IMGBB_KEY || '');
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', file);
+    uploadFormData.append('key', process.env.NEXT_PUBLIC_IMGBB_KEY || '');
 
     try {
       const response = await fetch('https://api.imgbb.com/1/upload', {
         method: 'POST',
-        body: formData
+        body: uploadFormData
       });
 
       const data = await response.json();
