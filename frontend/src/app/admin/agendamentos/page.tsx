@@ -116,10 +116,15 @@ export default function AgendamentosPage() {
         backgroundColor: getCorPorStatus(formData.status)
       };
 
+      console.log('Submitting admin:', agendamentoData); // Debug
+      console.log('Selected ID admin:', selectedAgendamento?.id); // Debug
+
       if (selectedAgendamento) {
         await updateAgendamento(selectedAgendamento.id!, agendamentoData);
+        alert('Agendamento atualizado com sucesso!');
       } else {
         await createAgendamento(agendamentoData);
+        alert('Agendamento criado com sucesso!');
       }
 
       await loadAgendamentos();
