@@ -38,8 +38,42 @@ export default function AgendamentosPage() {
   useEffect(() => {
     if (mounted) {
       checkAuth();
+      
+      // Listener para detectar mudanças no localStorage
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'cdl_admin_token' && !e.newValue) {
+          // Token foi removido (sessão encerrada)
+          setIsAuthenticated(false);
+          router.push('/admin/login?redirect=/agendamentos');
+        }
+      };
+
+      // Listener para detectar mudanças no Firebase Auth
+      const handleAuthChange = () => {
+        const token = localStorage.getItem('cdl_admin_token');
+        if (!token) {
+          setIsAuthenticated(false);
+          router.push('/admin/login?redirect=/agendamentos');
+        }
+      };
+
+      // Adiciona listeners
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Verificação periódica da sessão
+      const sessionCheck = setInterval(() => {
+        const token = localStorage.getItem('cdl_admin_token');
+        if (!token && isAuthenticated) {
+          handleAuthChange();
+        }
+      }, 5000); // Verifica a cada 5 segundos
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        clearInterval(sessionCheck);
+      };
     }
-  }, [mounted]);
+  }, [mounted, isAuthenticated]);
 
   const checkAuth = () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('cdl_admin_token') : null;
@@ -53,10 +87,21 @@ export default function AgendamentosPage() {
 
   const loadAgendamentos = async () => {
     try {
-      const data = await listAgendamentos();
-      setAgendamentos(data);
+      const agendamentosList = await listAgendamentos();
+      setAgendamentos(agendamentosList);
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
+      
+      // Verifica se o erro é de autenticação
+      if (error instanceof Error && 
+          (error.message.includes('unauthorized') || 
+           error.message.includes('permission-denied') ||
+           error.message.includes('auth'))) {
+        // Sessão expirada, redireciona para login
+        localStorage.removeItem('cdl_admin_token');
+        setIsAuthenticated(false);
+        router.push('/admin/login?redirect=/agendamentos');
+      }
     } finally {
       setLoading(false);
     }
