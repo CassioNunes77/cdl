@@ -187,6 +187,20 @@ export default function AgendamentosPage() {
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Erro ao excluir agendamento:', error);
+      
+      // Verifica se o erro é de permissões (sessão expirada)
+      if (error instanceof Error && 
+          (error.message.includes('Missing or insufficient permissions') ||
+           error.message.includes('permission-denied') ||
+           error.message.includes('unauthorized') ||
+           error.message.includes('auth'))) {
+        // Sessão expirada, redireciona para login
+        localStorage.removeItem('cdl_admin_token');
+        setIsAuthenticated(false);
+        router.push('/admin/login?redirect=/agendamentos');
+      } else {
+        alert('Erro ao excluir agendamento. Tente novamente.');
+      }
     }
   };
 
@@ -224,6 +238,20 @@ export default function AgendamentosPage() {
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Erro ao salvar agendamento:', error);
+      
+      // Verifica se o erro é de permissões (sessão expirada)
+      if (error instanceof Error && 
+          (error.message.includes('Missing or insufficient permissions') ||
+           error.message.includes('permission-denied') ||
+           error.message.includes('unauthorized') ||
+           error.message.includes('auth'))) {
+        // Sessão expirada, redireciona para login
+        localStorage.removeItem('cdl_admin_token');
+        setIsAuthenticated(false);
+        router.push('/admin/login?redirect=/agendamentos');
+      } else {
+        alert('Erro ao salvar agendamento. Tente novamente.');
+      }
     } finally {
       setIsSubmitting(false);
     }
