@@ -486,3 +486,95 @@ export async function setSettings(settings: Record<string, string>): Promise<voi
   await setDoc(ref, settings);
 }
 
+// ---- Agendamentos Auditorio (Firestore: collection) ----
+
+export type Agendamento = {
+  id?: string;
+  title: string;
+  start: string; // ISO datetime
+  end: string;   // ISO datetime
+  extendedProps: {
+    solicitante: string;
+    contato: string;
+    email: string;
+    status: 'pendente' | 'confirmado' | 'cancelado';
+    observacoes?: string;
+  };
+  backgroundColor: string;
+};
+
+export async function listAgendamentos(): Promise<Agendamento[]> {
+  const db = getDb();
+  const col = collection(db, 'agendamentos');
+  const q = query(col, orderBy('start', 'asc'));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      title: data.title,
+      start: data.start,
+      end: data.end,
+      extendedProps: data.extendedProps || {},
+      backgroundColor: data.backgroundColor || '#3788d8',
+    };
+  });
+}
+
+export async function getAgendamento(id: string): Promise<Agendamento | null> {
+  const db = getDb();
+  const ref = doc(db, 'agendamentos', id);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  return {
+    id: snap.id,
+    title: data.title,
+    start: data.start,
+    end: data.end,
+    extendedProps: data.extendedProps || {},
+    backgroundColor: data.backgroundColor || '#3788d8',
+  };
+}
+
+export async function createAgendamento(data: Omit<Agendamento, 'id'>): Promise<string> {
+  const db = getDb();
+  const col = collection(db, 'agendamentos');
+  const ref = await addDoc(col, {
+    title: data.title,
+    start: data.start,
+    end: data.end,
+    extendedProps: data.extendedProps,
+    backgroundColor: data.backgroundColor,
+  });
+  return ref.id;
+}
+
+export async function updateAgendamento(id: string, data: Partial<Agendamento>): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, 'agendamentos', id);
+  const payload: Record<string, unknown> = {};
+  if (data.title !== undefined) payload.title = data.title;
+  if (data.start !== undefined) payload.start = data.start;
+  if (data.end !== undefined) payload.end = data.end;
+  if (data.extendedProps !== undefined) payload.extendedProps = data.extendedProps;
+  if (data.backgroundColor !== undefined) payload.backgroundColor = data.backgroundColor;
+  await updateDoc(ref, payload);
+}
+
+export async function deleteAgendamento(id: string): Promise<void> {
+  const db = getDb();
+  const ref = doc(db, 'agendamentos', id);
+  await deleteDoc(ref);
+}
+
+// Função utilitária para definir cor baseada no status
+export function getCorPorStatus(status: Agendamento['extendedProps']['status']): string {
+  switch (status) {
+    case 'confirmado': return '#22c55e'; // verde
+    case 'cancelado': return '#ef4444'; // vermelho
+    case 'pendente': return '#f59e0b'; // amarelo
+    default: return '#3788d8'; // azul padrão
+  }
+}
+
