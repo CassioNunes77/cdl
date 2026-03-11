@@ -7,8 +7,9 @@ import Image from 'next/image';
 
 const adminNav = [
   { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/carousel', label: 'Carrossel' },
   { href: '/admin/associados', label: 'Associados' },
-  { href: '/admin/paginas', label: 'Páginas (Carrossel)' },
+  { href: '/admin/paginas', label: 'Páginas' },
   { href: '/admin/cdl-paulo-afonso', label: 'CDL Paulo Afonso' },
   { href: '/admin/diretoria', label: 'Diretoria' },
     {
