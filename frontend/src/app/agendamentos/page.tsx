@@ -160,7 +160,7 @@ export default function AgendamentosPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('cdl_admin_token');
-    router.push('/admin/login');
+    router.push('/admin/login?redirect=/agendamentos');
   };
 
   if (!mounted) return null;
