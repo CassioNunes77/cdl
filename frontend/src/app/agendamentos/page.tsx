@@ -25,7 +25,7 @@ export default function AgendamentosPage() {
     start: '',
     end: '',
     solicitante: '',
-    contato: '',
+    telefone: '',
     email: '',
     status: 'pendente' as Agendamento['extendedProps']['status'],
     observacoes: ''
@@ -69,7 +69,7 @@ export default function AgendamentosPage() {
       start: '',
       end: '',
       solicitante: '',
-      contato: '',
+      telefone: '',
       email: '',
       status: 'pendente',
       observacoes: ''
@@ -84,7 +84,7 @@ export default function AgendamentosPage() {
       start: agendamento.start,
       end: agendamento.end,
       solicitante: agendamento.extendedProps.solicitante,
-      contato: agendamento.extendedProps.contato,
+      telefone: agendamento.extendedProps.contato,
       email: agendamento.extendedProps.email,
       status: agendamento.extendedProps.status,
       observacoes: agendamento.extendedProps.observacoes || ''
@@ -115,7 +115,7 @@ export default function AgendamentosPage() {
         end: formData.end,
         extendedProps: {
           solicitante: formData.solicitante,
-          contato: formData.contato,
+          contato: formData.telefone,
           email: formData.email,
           status: formData.status,
           observacoes: formData.observacoes
@@ -254,9 +254,9 @@ export default function AgendamentosPage() {
                         </span>
                       </div>
                       <div className="space-y-1 text-sm text-gray-600">
-                        <p><strong>Solicitante:</strong> {agendamento.extendedProps.solicitante}</p>
-                        <p><strong>Contato:</strong> {agendamento.extendedProps.contato}</p>
-                        <p><strong>Email:</strong> {agendamento.extendedProps.email}</p>
+                        <p><strong>Solicitante:</strong> {agendamento.extendedProps.solicitante || 'Não informado'}</p>
+                        <p><strong>Telefone:</strong> {agendamento.extendedProps.contato || 'Não informado'}</p>
+                        <p><strong>Email:</strong> {agendamento.extendedProps.email || 'Não informado'}</p>
                         <p><strong>Início:</strong> {formatDate(agendamento.start)}</p>
                         <p><strong>Término:</strong> {formatDate(agendamento.end)}</p>
                         {agendamento.extendedProps.observacoes && (
@@ -360,17 +360,16 @@ export default function AgendamentosPage() {
                     value={formData.solicitante}
                     onChange={(e) => setFormData({ ...formData, solicitante: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cdl-blue focus:border-cdl-blue"
-                    required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contato
+                    Telefone
                   </label>
                   <input
                     type="text"
-                    value={formData.contato}
-                    onChange={(e) => setFormData({ ...formData, contato: e.target.value })}
+                    value={formData.telefone}
+                    onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cdl-blue focus:border-cdl-blue"
                     required
                   />
@@ -386,7 +385,6 @@ export default function AgendamentosPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cdl-blue focus:border-cdl-blue"
-                  required
                 />
               </div>
 
