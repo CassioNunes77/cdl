@@ -283,10 +283,14 @@ export default function AgendamentosPage() {
                       </div>
                       <div className="space-y-1 text-sm text-gray-600">
                         <p><strong>Solicitante:</strong> {agendamento.extendedProps.solicitante || 'Não informado'}</p>
-                        <p><strong>Telefone:</strong> {agendamento.extendedProps.contato || 'Não informado'}</p>
-                        <p><strong>Email:</strong> {agendamento.extendedProps.email || 'Não informado'}</p>
+                        {agendamento.extendedProps.solicitante && (
+                          <p><strong>Telefone:</strong> {agendamento.extendedProps.contato || 'Não informado'}</p>
+                        )}
+                        {agendamento.extendedProps.solicitante && (
+                          <p><strong>Email:</strong> {agendamento.extendedProps.email || 'Não informado'}</p>
+                        )}
                         <p><strong>Início:</strong> {formatDate(agendamento.start)}</p>
-                        <p><strong>Término:</strong> {formatDate(agendamento.end)}</p>
+                        <p><strong>Término:</strong> {agendamento.end ? formatDate(agendamento.end) : 'Não informado'}</p>
                         {agendamento.extendedProps.observacoes && (
                           <p><strong>Observações:</strong> {agendamento.extendedProps.observacoes}</p>
                         )}
