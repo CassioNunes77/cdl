@@ -385,9 +385,16 @@ export default function AgendamentosPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Calendário Visual */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Calendário de Agendamentos</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Calendário de Agendamentos 
+            {statusFilter !== 'todos' && (
+              <span className="text-sm font-normal text-gray-600 ml-2">
+                (Filtrando: {statusFilter})
+              </span>
+            )}
+          </h2>
           <CalendarAgendamentos
-            agendamentos={agendamentos}
+            agendamentos={filteredAgendamentos}
             onEventClick={handleEdit}
             onDateClick={(date) => {
               // Pré-preencher data ao clicar no calendário
@@ -402,7 +409,14 @@ export default function AgendamentosPage() {
         {/* Lista de Agendamentos */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Agendamentos</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Agendamentos
+              {statusFilter !== 'todos' && (
+                <span className="text-sm font-normal text-gray-600 ml-2">
+                  (Filtrando: {statusFilter})
+                </span>
+              )}
+            </h2>
           </div>
           <div className="divide-y divide-gray-200">
             {filteredAgendamentos.length === 0 ? (
