@@ -369,6 +369,6 @@ export default function CarouselPage() {
         onClose={() => setShowSuccessModal(false)}
         message="Salvo com sucesso!"
       />
-    </>
+    </div>
   );
 }
