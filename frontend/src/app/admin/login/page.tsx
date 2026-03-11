@@ -32,7 +32,9 @@ export default function AdminLoginPage() {
         
         // Verifica se veio da página /agendamentos
         const redirectTo = searchParams.get('redirect');
-        if (redirectTo === '/agendamentos') {
+        console.log('Redirect parameter:', redirectTo); // Debug
+        
+        if (redirectTo === '/agendamentos' || redirectTo === 'agendamentos') {
           router.push('/agendamentos');
         } else {
           router.push('/admin');
@@ -49,7 +51,9 @@ export default function AdminLoginPage() {
         
         // Verifica se veio da página /agendamentos
         const redirectTo = searchParams.get('redirect');
-        if (redirectTo === '/agendamentos') {
+        console.log('Redirect parameter (fallback):', redirectTo); // Debug
+        
+        if (redirectTo === '/agendamentos' || redirectTo === 'agendamentos') {
           router.push('/agendamentos');
         } else {
           router.push('/admin');
