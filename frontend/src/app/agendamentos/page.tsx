@@ -1,25 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { listAgendamentos, createAgendamento, updateAgendamento, deleteAgendamento, type Agendamento, getCorPorStatus } from '@/lib/firestore';
+import { listAgendamentos, createAgendamento, updateAgendamento, deleteAgendamento, type Agendamento, getCorPorStatus, listContratos, type Contrato } from '@/lib/firestore';
 import { SuccessModal } from '@/components/ui/SuccessModal';
 import { CalendarAgendamentos } from '@/components/admin/CalendarAgendamentos';
 
 export default function AgendamentosPage() {
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  // Agendamentos state
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
-  const [filteredAgendamentos, setFilteredAgendamentos] = useState<Agendamento[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string>('todos');
+  const [loading, setLoading] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedAgendamento, setSelectedAgendamento] = useState<Agendamento | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Estados para contrato
+  const [showContratoModal, setShowContratoModal] = useState(false);
+  const [selectedContrato, setSelectedContrato] = useState<any>(null);
+  const [contratoData, setContratoData] = useState<Record<string, string>>({});
+  const [viewMode, setViewMode] = useState<'edit' | 'view'>('edit');
 
   // Form data
   const [formData, setFormData] = useState({
@@ -34,91 +32,19 @@ export default function AgendamentosPage() {
   });
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      checkAuth();
-      
-      // Listener para detectar mudanças no localStorage
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === 'cdl_admin_token' && !e.newValue) {
-          // Token foi removido (sessão encerrada)
-          setIsAuthenticated(false);
-          router.push('/admin/login?redirect=/agendamentos');
-        }
-      };
-
-      // Listener para detectar mudanças no Firebase Auth
-      const handleAuthChange = () => {
-        const token = localStorage.getItem('cdl_admin_token');
-        if (!token) {
-          setIsAuthenticated(false);
-          router.push('/admin/login?redirect=/agendamentos');
-        }
-      };
-
-      // Adiciona listeners
-      window.addEventListener('storage', handleStorageChange);
-      
-      // Verificação periódica da sessão
-      const sessionCheck = setInterval(() => {
-        const token = localStorage.getItem('cdl_admin_token');
-        if (!token && isAuthenticated) {
-          handleAuthChange();
-        }
-      }, 5000); // Verifica a cada 5 segundos
-
-      return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        clearInterval(sessionCheck);
-      };
-    }
-  }, [mounted, isAuthenticated]);
-
-  const checkAuth = () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('cdl_admin_token') : null;
-    if (!token) {
-      router.push('/admin/login?redirect=/agendamentos');
-      return;
-    }
-    setIsAuthenticated(true);
     loadAgendamentos();
-  };
+  }, []);
 
   const loadAgendamentos = async () => {
     try {
-      const agendamentosList = await listAgendamentos();
-      setAgendamentos(agendamentosList);
+      const data = await listAgendamentos();
+      setAgendamentos(data);
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
-      
-      // Verifica se o erro é de autenticação
-      if (error instanceof Error && 
-          (error.message.includes('unauthorized') || 
-           error.message.includes('permission-denied') ||
-           error.message.includes('auth'))) {
-        // Sessão expirada, redireciona para login
-        localStorage.removeItem('cdl_admin_token');
-        setIsAuthenticated(false);
-        router.push('/admin/login?redirect=/agendamentos');
-      }
     } finally {
       setLoading(false);
     }
   };
-
-  // Filtra agendamentos por status
-  useEffect(() => {
-    if (statusFilter === 'todos') {
-      setFilteredAgendamentos(agendamentos);
-    } else {
-      setFilteredAgendamentos(agendamentos.filter(agendamento => 
-        agendamento.extendedProps.status === statusFilter
-      ));
-    }
-  }, [agendamentos, statusFilter]);
 
   const handleCreate = () => {
     setSelectedAgendamento(null);
@@ -187,20 +113,51 @@ export default function AgendamentosPage() {
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Erro ao excluir agendamento:', error);
+    }
+  };
+
+  const handleContrato = async (agendamento: Agendamento) => {
+    try {
+      // Carregar contratos disponíveis
+      const contratos = await listContratos();
       
-      // Verifica se o erro é de permissões (sessão expirada)
-      if (error instanceof Error && 
-          (error.message.includes('Missing or insufficient permissions') ||
-           error.message.includes('permission-denied') ||
-           error.message.includes('unauthorized') ||
-           error.message.includes('auth'))) {
-        // Sessão expirada, redireciona para login
-        localStorage.removeItem('cdl_admin_token');
-        setIsAuthenticated(false);
-        router.push('/admin/login?redirect=/agendamentos');
-      } else {
-        alert('Erro ao excluir agendamento. Tente novamente.');
+      if (contratos.length === 0) {
+        alert('Nenhum modelo de contrato encontrado. Crie um modelo primeiro.');
+        return;
       }
+
+      // Usar o primeiro contrato (futuramente pode haver seleção)
+      const contrato = contratos[0];
+      setSelectedContrato(contrato);
+      setSelectedAgendamento(agendamento);
+      
+      // Preparar dados para substituição (dados do agendamento)
+      const dadosAgendamento: Record<string, string> = {
+        nome_cliente: agendamento.extendedProps.solicitante || 'Não informado',
+        data_evento: formatDate(agendamento.start),
+        titulo_evento: agendamento.title,
+        telefone: agendamento.extendedProps.contato || 'Não informado',
+        email: agendamento.extendedProps.email || 'Não informado',
+        observacoes: agendamento.extendedProps.observacoes || 'Não informado'
+      };
+
+      // Preparar campos editáveis do contrato (placeholders)
+      const camposEditaveis: Record<string, string> = {};
+      if (contrato.campos) {
+        contrato.campos.forEach(campo => {
+          // Primeiro tenta usar os campos salvos no agendamento
+          const valorSalvo = agendamento.extendedProps.camposContrato?.[campo];
+          const valorPadrao = dadosAgendamento[campo] || '';
+          camposEditaveis[campo] = valorSalvo || valorPadrao;
+        });
+      }
+
+      setContratoData(camposEditaveis);
+      setViewMode('edit');
+      setShowContratoModal(true);
+    } catch (error) {
+      console.error('Erro ao carregar contrato:', error);
+      alert('Erro ao carregar modelo de contrato.');
     }
   };
 
@@ -223,9 +180,6 @@ export default function AgendamentosPage() {
         backgroundColor: getCorPorStatus(formData.status)
       };
 
-      console.log('Submitting:', agendamentoData); // Debug
-      console.log('Selected ID:', selectedAgendamento?.id); // Debug
-
       if (selectedAgendamento) {
         await updateAgendamento(selectedAgendamento.id!, agendamentoData);
       } else {
@@ -238,20 +192,6 @@ export default function AgendamentosPage() {
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Erro ao salvar agendamento:', error);
-      
-      // Verifica se o erro é de permissões (sessão expirada)
-      if (error instanceof Error && 
-          (error.message.includes('Missing or insufficient permissions') ||
-           error.message.includes('permission-denied') ||
-           error.message.includes('unauthorized') ||
-           error.message.includes('auth'))) {
-        // Sessão expirada, redireciona para login
-        localStorage.removeItem('cdl_admin_token');
-        setIsAuthenticated(false);
-        router.push('/admin/login?redirect=/agendamentos');
-      } else {
-        alert('Erro ao salvar agendamento. Tente novamente.');
-      }
     } finally {
       setIsSubmitting(false);
     }
@@ -276,28 +216,13 @@ export default function AgendamentosPage() {
     });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('cdl_admin_token');
-    router.push('/admin/login?redirect=/agendamentos');
-  };
-
-  if (!mounted) return null;
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cdl-blue mx-auto"></div>
-          <p className="mt-2 text-gray-600">Verificando autenticação...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cdl-blue"></div>
-        <p className="mt-2 text-gray-600">Carregando agendamentos...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cdl-blue mx-auto"></div>
+          <p className="mt-2 text-gray-600">Carregando agendamentos...</p>
+        </div>
       </div>
     );
   }
@@ -319,63 +244,6 @@ export default function AgendamentosPage() {
               >
                 + Novo Agendamento
               </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filtro de Status */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">Filtrar por status:</span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setStatusFilter('todos')}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  statusFilter === 'todos' 
-                    ? 'bg-cdl-blue text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Todos
-              </button>
-              <button
-                onClick={() => setStatusFilter('pendente')}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  statusFilter === 'pendente' 
-                    ? 'bg-yellow-500 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Pendente
-              </button>
-              <button
-                onClick={() => setStatusFilter('confirmado')}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  statusFilter === 'confirmado' 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Confirmado
-              </button>
-              <button
-                onClick={() => setStatusFilter('cancelado')}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  statusFilter === 'cancelado' 
-                    ? 'bg-red-500 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Cancelado
-              </button>
             </div>
           </div>
         </div>
@@ -386,15 +254,10 @@ export default function AgendamentosPage() {
         {/* Calendário Visual */}
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Calendário de Agendamentos 
-            {statusFilter !== 'todos' && (
-              <span className="text-sm font-normal text-gray-600 ml-2">
-                (Filtrando: {statusFilter})
-              </span>
-            )}
+            Calendário de Agendamentos
           </h2>
           <CalendarAgendamentos
-            agendamentos={filteredAgendamentos}
+            agendamentos={agendamentos}
             onEventClick={handleEdit}
             onDateClick={(date) => {
               // Pré-preencher data ao clicar no calendário
@@ -411,23 +274,15 @@ export default function AgendamentosPage() {
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
               Agendamentos
-              {statusFilter !== 'todos' && (
-                <span className="text-sm font-normal text-gray-600 ml-2">
-                  (Filtrando: {statusFilter})
-                </span>
-              )}
             </h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {filteredAgendamentos.length === 0 ? (
+            {agendamentos.length === 0 ? (
               <div className="p-6 text-center text-gray-500">
-                {statusFilter === 'todos' 
-                  ? 'Nenhum agendamento encontrado. Crie seu primeiro agendamento.'
-                  : `Nenhum agendamento com status "${statusFilter}" encontrado.`
-                }
+                Nenhum agendamento encontrado. Crie seu primeiro agendamento.
               </div>
             ) : (
-              filteredAgendamentos.map((agendamento) => (
+              agendamentos.map((agendamento) => (
                 <div key={agendamento.id} className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
