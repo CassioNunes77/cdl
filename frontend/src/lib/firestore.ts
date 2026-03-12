@@ -578,3 +578,54 @@ export function getCorPorStatus(status: Agendamento['extendedProps']['status']):
   }
 }
 
+// Tipos para Contratos
+export interface Contrato {
+  id?: string;
+  nome: string;
+  conteudo: string;
+  campos?: string[];
+  imagens?: string[];
+  criado_em: string;
+}
+
+// Funções para Contratos
+export async function createContrato(contrato: Omit<Contrato, 'id'>) {
+  const db = getFirestore();
+  const docRef = await addDoc(collection(db, 'contratos'), contrato);
+  return docRef.id;
+}
+
+export async function updateContrato(id: string, contrato: Partial<Contrato>) {
+  const db = getFirestore();
+  const docRef = doc(db, 'contratos', id);
+  await updateDoc(docRef, contrato);
+}
+
+export async function deleteContrato(id: string) {
+  const db = getFirestore();
+  const docRef = doc(db, 'contratos', id);
+  await deleteDoc(docRef);
+}
+
+export async function getContrato(id: string): Promise<Contrato | null> {
+  const db = getFirestore();
+  const docRef = doc(db, 'contratos', id);
+  const docSnap = await getDoc(docRef);
+  
+  if (docSnap.exists()) {
+    return { id: docSnap.id, ...docSnap.data() } as Contrato;
+  }
+  return null;
+}
+
+export async function listContratos(): Promise<Contrato[]> {
+  const db = getFirestore();
+  const q = query(collection(db, 'contratos'), orderBy('criado_em', 'desc'));
+  const querySnapshot = await getDocs(q);
+  
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as Contrato[];
+}
+

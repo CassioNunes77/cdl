@@ -193,6 +193,12 @@ export default function AgendamentosPage() {
             + Novo Agendamento
           </button>
           <Link
+            href="/admin/contratos"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            📄 Modelo de Contrato
+          </Link>
+          <Link
             href="/admin"
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           >

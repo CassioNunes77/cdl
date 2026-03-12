@@ -85,3 +85,9 @@ service cloud.firestore {
   }
 }
 
+// Regras para a coleção contratos
+match /contratos/{documentId} {
+  allow read: if true; // Leitura pública
+  allow write: if isAdmin(); // Apenas admins podem escrever
+}
+
