@@ -224,9 +224,13 @@ export default function AgendamentosPage() {
       body { margin: 0; }
       .no-print { display: none; }
     }
+    @page {
+      margin: 20mm;
+      size: A4;
+    }
     body { 
       font-family: Arial, sans-serif; 
-      margin: 20px; 
+      margin: 0; 
       line-height: 1.6; 
       font-size: 12pt;
     }
@@ -237,7 +241,6 @@ export default function AgendamentosPage() {
       padding-bottom: 20px;
     }
     .title { font-size: 18pt; font-weight: bold; margin-bottom: 10px; }
-    .subtitle { font-size: 14pt; color: #666; margin-bottom: 5px; }
     .content { 
       white-space: pre-wrap; 
       text-align: justify;
@@ -256,8 +259,6 @@ export default function AgendamentosPage() {
 <body>
   <div class="header">
     <div class="title">${selectedContrato.nome || 'CONTRATO DE USO DO AUDITÓRIO'}</div>
-    <div class="subtitle">${selectedAgendamento.title}</div>
-    <div class="subtitle">Data: ${formatDate(selectedAgendamento.start)}</div>
   </div>
   <div class="content">
 ${contratoProcessado}
@@ -270,17 +271,30 @@ ${contratoProcessado}
 </html>
       `;
 
-      // Abrir janela de impressão
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(conteudoImpressao);
-        printWindow.document.close();
-        printWindow.focus();
+      // Criar iframe oculto para impressão
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'absolute';
+      iframe.style.left = '-9999px';
+      iframe.style.top = '-9999px';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = 'none';
+      
+      document.body.appendChild(iframe);
+      
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (iframeDoc) {
+        iframeDoc.open();
+        iframeDoc.write(conteudoImpressao);
+        iframeDoc.close();
         
-        // Aguardar carregamento e disparar impressão
+        // Aguardar carregamento e disparar impressão diretamente
         setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
+          iframe.contentWindow?.print();
+          // Remover iframe após impressão
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+          }, 1000);
         }, 500);
       }
       
