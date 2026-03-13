@@ -8,17 +8,28 @@ import Image from 'next/image';
 const adminNav = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/carousel', label: 'Carrossel' },
-  { href: '/admin/agendamentos', label: 'Agenda' },
-  { href: '/admin/contratos', label: 'Contrato' },
-  { href: '/admin/associados', label: 'Associados' },
+  {
+    label: 'Associados',
+    children: [
+      { href: '/admin/associados', label: 'Lista de Associados' },
+      { href: '/admin/associados/adicionar', label: 'Adicionar Associado' },
+    ],
+  },
   { href: '/admin/aniversarios', label: 'Aniversários' },
   { href: '/admin/paginas', label: 'Páginas' },
   { href: '/admin/cdl-paulo-afonso', label: 'CDL Paulo Afonso' },
   { href: '/admin/diretoria', label: 'Diretoria' },
     {
+      label: 'Auditório',
+      children: [
+        { href: '/admin/agendamentos', label: 'Agenda' },
+        { href: '/admin/contratos', label: 'Contrato' },
+        { href: '/admin/auditorio', label: 'Auditório' },
+      ],
+    },
+    {
       label: 'Soluções para Empresas',
       children: [
-        { href: '/admin/auditorio', label: 'Auditório' },
         { href: '/admin/certificado-digital', label: 'Certificado Digital' },
         { href: '/admin/beneficios-associados', label: 'Benefícios para Associados' },
         { href: '/admin/servicos', label: 'Serviços' },
@@ -34,6 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setMounted(true);
@@ -43,6 +55,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (typeof document !== 'undefined' && pathname.startsWith('/admin')) {
       document.title = 'Painel ADM | CDL';
     }
+  }, [pathname]);
+
+  const toggleMenu = (label: string) => {
+    setExpandedMenus(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(label)) {
+        newSet.delete(label);
+      } else {
+        newSet.add(label);
+      }
+      return newSet;
+    });
+  };
+
+  // Auto-expand menus when their children are active
+  useEffect(() => {
+    const activeMenus = new Set<string>();
+    adminNav.forEach(item => {
+      if ('children' in item) {
+        const hasActiveChild = item.children?.some(child => pathname === child.href);
+        if (hasActiveChild) {
+          activeMenus.add(item.label);
+        }
+      }
+    });
+    setExpandedMenus(activeMenus);
   }, [pathname]);
 
   if (!mounted) return null;
@@ -74,20 +112,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {adminNav.map((item) =>
             'children' in item ? (
               <div key={item.label} className="mb-1">
-                <p className="px-3 py-1.5 text-xs font-semibold text-cdl-gray-text uppercase tracking-wider">
-                  {item.label}
-                </p>
-                {(item.children ?? []).map((child) => (
-                  <Link
-                    key={child.href}
-                    href={child.href}
-                    className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ml-1 ${
-                      pathname === child.href ? 'bg-cdl-blue text-white' : 'text-gray-700 hover:bg-cdl-gray'
+                <button
+                  onClick={() => toggleMenu(item.label)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-bold transition-colors text-left border ${
+                    expandedMenus.has(item.label)
+                      ? 'bg-cdl-blue text-white border-cdl-blue'
+                      : 'text-gray-800 border-gray-300 hover:bg-gray-100 hover:border-gray-400'
+                  }`}
+                >
+                  <span className="flex-1">{item.label}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform flex-shrink-0 ${
+                      expandedMenus.has(item.label) ? 'rotate-90' : ''
                     }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    {child.label}
-                  </Link>
-                ))}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                {expandedMenus.has(item.label) && (
+                  <div className="mt-1 space-y-0.5">
+                    {(item.children ?? []).map((child) => (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ml-4 ${
+                          pathname === child.href
+                            ? 'bg-cdl-blue text-white'
+                            : 'text-gray-600 hover:bg-cdl-gray'
+                        }`}
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <Link

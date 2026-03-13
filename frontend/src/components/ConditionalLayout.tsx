@@ -11,6 +11,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') ?? false;
   const isAgendamentosPage = pathname === '/agendamentos';
+  const isConfiguracoesPage = pathname === '/admin/configuracoes';
 
   useEffect(() => {
     // Initialize Firebase/Analytics only on public pages (not in admin and not agendamentos)
@@ -24,15 +25,17 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  // Área admin - WhatsApp apenas na página de configurações
   if (isAdmin) {
     return (
       <>
         {children}
-        <WhatsAppButton />
+        {isConfiguracoesPage && <WhatsAppButton />}
       </>
     );
   }
 
+  // Páginas públicas - layout completo com header, footer e WhatsApp
   return (
     <>
       <Header />

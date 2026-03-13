@@ -538,7 +538,7 @@ export async function getAgendamento(id: string): Promise<Agendamento | null> {
   };
 }
 
-export async function createAgendamento(data: Omit<Agendamento, 'id'>): Promise<string> {
+export async function createAgendamento(data: Omit<Agendamento, 'id'>): Promise<Agendamento> {
   const db = getDb();
   const col = collection(db, 'agendamentos');
   const ref = await addDoc(col, {
@@ -548,7 +548,16 @@ export async function createAgendamento(data: Omit<Agendamento, 'id'>): Promise<
     extendedProps: data.extendedProps,
     backgroundColor: data.backgroundColor,
   });
-  return ref.id;
+  
+  // Retornar o agendamento completo com o ID gerado
+  return {
+    id: ref.id,
+    title: data.title,
+    start: data.start,
+    end: data.end,
+    extendedProps: data.extendedProps,
+    backgroundColor: data.backgroundColor,
+  };
 }
 
 export async function updateAgendamento(id: string, data: Partial<Agendamento>): Promise<void> {
